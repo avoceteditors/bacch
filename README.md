@@ -3,9 +3,12 @@
 `bacch` provides a series of utilities to assist writers working in unix-like environments, such as Linux and FreeBSD.  These utilities include presentation, project statistics, and development tools.  It requires Python 3 and the Sphinx documentation builder.
 
 
+
 ## Current Development
 
 **Version 0.1** is in active development.  This is the initial version for the project, as such there is no stable branch available.  For the time being you should not use anything in this repo as it either doesn't work or doesn't do anything.
+
+*Note*: For the present, the author can only perform testing in Linux and would appreciate comment on any problems that arise on FreebSD.  Preferably comment that can point to the why and how.
 
 Feature Goals:
 
