@@ -11,7 +11,7 @@ Feature Goals:
 
 - **Project Builder**: Develop a simplified call system for generate presentation documents from source code.  For this version, focus on implementing the Sphinx build system with HTML output.  Assume that the source directory contains a `conf.py` file, but prepare for when it doesn't.
 
-- **Project Updater**: Develop a parser for source files.  This system should read all files in the source directory, sort them based on logical structure noting any files that do not fit into the TOC tree, then create a JSON file at the project root.  For this version focused on reading source files in reStructuredText.
+- **Project Updater**: Develop a parser for source files.  This system should read all files in the source directory, sort them based on logical structure noting any files that do not fit into the TOC tree, then create a JSON file at the project root.  For this version focus on reading source files in reStructuredText.
 
 - **Installation Script**: Develop an installation script that users can run to update their systems with the newest version of bacch.  This system should copy relevant files to their expected locations, (id est, configs to `/etc`, modules to `/usr`, et cetera).  It should also create or update the launch script in `/usr/bin` where necessary.
 
