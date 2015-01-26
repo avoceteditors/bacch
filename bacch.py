@@ -68,11 +68,11 @@ def find_most_recent(filelist):
             mtime = modtime
     return mtime
 
-def check_status(source):
+def check_status(source, checkfile):
     print("Determine Project Status")
     project_modtime = find_most_recent(source)
     test = False
-    struct_file = "./.struct.json"
+    check = checkfile
 
     if os.path.exists(struct_file):
         stats = os.stat(struct_file)
@@ -109,29 +109,24 @@ def classify_project(source):
 # General Reader Functions
 
 # Read reStructuredText
-def read_rest(sourcelist):
+def read_rest(sourcelist, action):
     print("Reading in reStructuredText")
-    struct = ""
 
-    for i in sourcelist:
-        if i[-4:] == ".rst":
-            print("Now reading: %s" % i)
-
-            # fileread_rest, reads four lines together
-            # to determine if it's looking at a heading.
-            # ditto for spotting toctree.
+    # Find Config File
+    config = ''
+    if './source/conf.py' in sourcelist:
+        config = './source/conf.py'
+    elif '.config' in os.listdir('.'):
+        # Call Configreader
+        pass
+    else:
+        print("Unable to find configuration file.")
+        sys.exit(1)
     
 
-    print(struct)
-
-    # Write the struct to File
-    struct_file = open("./.struct.json", "w")
-    struct_file.write(struct)
-    struct_file.close()
-
-
+        
 # Read XML
-def read_xml(sourcelist):
+def read_xml(sourcelist, action):
     print("Reading in XML")
 
 
@@ -140,33 +135,44 @@ def read_xml(sourcelist):
 # Subparser Functions
 
 # Project Builder
-def builder(arguments):
+def builder(arguments, sources, project_type):
     print("Running Project Build")
 
-# Project Strcuture Updater
-def struct(arguments):
-    print("Running Project Update")
-
-    # Read Source Directory and log files
-    print("Check project directory...\n")
-    source_list = find_source()
-
-    # Classify Project
-    project_type = classify_project(source_list)
 
     # Determine if source files are more 
     #   recent than struct.json
-    status = check_status(source_list)
+    status = check_status(source_list, os.listdir('build'))
+    
+    if status or arguments.force:
+        print("Starting Project build")
+
+        # Launch Readers
+        if project_type == 1:
+            read_rest(sources, 1)
+        elif project_type == 0:
+            read_xml(sources, 1)
+
+    else:
+        print("Project up to date.")
+    
+    
+# Project Strcuture Updater
+def struct(arguments, sources, project_type):
+    print("Running Project Update")
+
+
+    # Determine if source files are more 
+    #   recent than struct.json
+    status = check_status(source_list, ["./.struct.json"])
 
     if status or arguments.force:
         print("Updating Project struct")
         
         # Launch Readers
         if project_type == 1:
-            read_rest(source_list)
+            read_rest(sources, 0)
         elif project_type == 2:
-            read_xml(source_list)
-
+            read_xml(sources, 0)
 
     else:
         print("Project struct up to date.")
@@ -190,7 +196,8 @@ def main():
 
     # Base Arugments
     parser.add_argument('-f', '--force', action="store_true")
-
+    parser.add_argument('-s','--standalone',action="store_true")
+    
     # Subparser for Building Projects
     build = subparsers.add_parser('build')
     build.set_defaults(func=builder)
@@ -205,7 +212,18 @@ def main():
 
     # Parse Arguments and Call Relevant Functions
     args = parser.parse_args()
-    args.func(args)
+
+
+    # Read Source Directory and log files
+    print("Check project directory...\n")
+    source_list = find_source()
+
+    # Classify Project
+    project_type = classify_project(source_list)
+
+
+    # Launch Argument Functions
+    args.func(args, source_list, project_type)
 
 
 
