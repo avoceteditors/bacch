@@ -19,115 +19,281 @@
 #####################################
 # Module Imports
 
-import sys, argparse, os, os.path
+import sys, argparse, os, os.path, configparser
 
 ####################################
 # Classes
 
-###################################
-# General Functions
+class Project():
 
 
-# Remove Temporary Files
-def clean_listing(path):
-    newlist = []
-    listing = os.listdir(path)
-
-    for i in listing:
-        filename = path + i
-        if os.path.isfile(filename):
-            if i[-1] != "~" and i[-1] != "#":
-                newlist.append(filename)
-    return newlist
+    # Parse Config File
+    def parse_config(self, path):
+        if path == None:
+            self.title == 'Untitled Project'
+            self.author == 'Unnamed Author'
+            self.work == 'Undefined Project Type'
+        else:
+            config = configparser.ConfigParser()
+            config.read_file(open(path))
 
 
-# Differentiate between ReST/XML
-def find_source():
-    listing = os.listdir('.')
-    source = ""
-    if 'source' in listing:
-        source = "./source/"
-    elif 'src' in listing:
-        source = "./src/"
-    else:
-        print("Error: This is not a project directory")
-        sys.exit(1)
 
-    listing = clean_listing(source)
-    return listing
+    # Initialize Class
+    def __init__(self, args):
+        
 
-# Find Most Recent Change
-def find_most_recent(filelist):
-    print("Determine Most Recent Source File")
-    mtime = 0
+        # Initialize Locations
+        sourcelist = [ 'source/',
+                       'src/' ]
+        outputlist = [ 'build/',
+                       'output/']
+        
+        xmlindex = [ 'index.xml',
+                     'book.xml']
+        restindex = [ 'index.rst',
+                     'index.txt']
+        tmp = 'tmp/'
 
-    for i in filelist:
-        stats = os.stat(i)
-        modtime = stats.st_mtime
-        if modtime > mtime:
-            mtime = modtime
-    return mtime
+        # Initialize Arugment Variable
+        path = args.set_path
+        form = args.set_format
+        output = args.output
+        target = args.target
+        standalone = args.standalone
 
-def check_status(source, checkfile):
-    print("Determine Project Status")
-    project_modtime = find_most_recent(source)
-    test = False
-    check = checkfile
+        # Initialize Class Variables
+        self.path = ''
+        self.form = 0
+        self.config = ''
+        self.title = ''
+        self.author = ''
+        self.work = ''
+        self.source = ''
+        self.build = ''
+        self.sourcefiles = {}
+        self.target = 0
+        self.index = []
+        home = os.path.expandvars('$HOME')
 
-    if os.path.exists(struct_file):
-        stats = os.stat(struct_file)
-        struct_modtime = stats.st_mtime
-        if project_modtime > struct_modtime:
-            test = True
-    else:
-        test = True
-
-    return test
-
-# Determine If XML or reStructuredText Project
-def classify_project(source):
-    xml = rst = 0
-    for i in source:
-        extension = i[-4:]
-    
-        if extension == ".xml":
-            xml = xml + 1
-        elif extension == ".rst":
-            rst = rst + 1
-
-    if xml < rst:
-        print("Project classified as reStructuredText")
-        return 1
-    elif xml > rst:
-        print("Project classified as XML")
-        return 2
-    else:
-        print("No classification found")
-        return 0
-
-###################################
-# General Reader Functions
-
-# Read reStructuredText
-def read_rest(sourcelist, action):
-    print("Reading in reStructuredText")
-
-    # Find Config File
-    config = ''
-    if './source/conf.py' in sourcelist:
-        config = './source/conf.py'
-    elif '.config' in os.listdir('.'):
-        # Call Configreader
-        pass
-    else:
-        print("Unable to find configuration file.")
-        sys.exit(1)
-    
+        self.tmp = ''
+        self.configscan = [ home + '/.config/bacch/' ]
 
         
-# Read XML
-def read_xml(sourcelist, action):
-    print("Reading in XML")
+
+        # Define Path
+        if path:
+            if os.path.isdir(path):
+                self.path = path
+        else:
+            self.path = './'
+        
+        # Define Source Path
+        for i in sourcelist:
+            source = self.path + i
+            if os.path.exists(source):
+                if os.path.isdir(source):
+                    self.source = source
+        if not self.source:
+            sys.exit("Error: No source directory.")
+            
+        # Build sourcefile dictionary
+        for i in os.listdir(self.source):
+            self.sourcefiles[i] = self.path + i
+
+
+        # Define Format
+        if form:
+            if form.lower() == 'xml':
+                print("Reading project as XML.")
+                self.index = xmlindex
+                self.form = 1
+            elif form.lower() == 'rst':
+                print("Reading project as reStructuredText")
+                self.index = restindex
+                self.form = 2
+            elif form.lower() == 'rest':
+                print("Reading project as reStructuredText")
+                self.index = restindex
+                self.form = 2
+
+            elif form.lower() == 'restructuredtext':
+                print("Reading project as reStructuredText")
+                self.index = restindex
+                self.form = 2
+            else:
+                sys.exit("Error: Invalid read format.")
+
+        else:
+            listing = os.listdir(self.source)
+            xml = rest = 0
+            for key in self.sourcefiles:
+                extension = str(self.sourcefiles[i])[-4:]
+                if 'xml' in extension:
+                    xml = xml + 1
+                elif 'rst' in extension:
+                    rest = rest + 1
+
+            if xml > rest:
+                print("Reading project as XML.")
+                self.index = xmlindex
+                self.form = 1
+            elif xml < rest:
+                print("Reading project as reStructuredText")
+                self.index = restindex
+                self.form = 2
+            else:
+                sys.exit("Error: Unable to determine read format.\n \t Consider using bacch with the --set_format option.\n")
+
+
+
+        # Set Output Format
+        workpath = ''
+        if target:
+            if target == 'html'.lower() and standalone:
+                print("Defining Output as Standalone HTML.")
+                self.target = 1
+            elif target == 'html'.lower():
+                print("Defining Output as HTML")
+                workpath = 'html/'
+                self.target = 2
+            elif target == 'pdf'.lower() and standalone:
+                print("Defining Output as Standalone PDF.")
+                self.target = 3
+            elif target == 'pdf'.lower():
+                print("Defining Output as Chapter Formatted PDF")
+                workpath = 'pdf/'
+                self.target = 4
+            elif target == 'docx'.lower() or target == 'doc':
+                if standalone:
+                    print("Defining Output as Standalone Microsoft Word Document")
+                    self.target = 5
+                else:
+                    print("Defining Output as Chapter Formatted Microsoft Word Document")
+                    workpath = 'word/'
+                    self.target = 6
+        else:
+            print("Defining Output as HTML")
+            self.target = 2
+
+
+
+        # Define Build Path
+        if output:
+            if os.path.isdir(output):
+                if output[-1] != '/':
+                    self.output = output + '/'
+                else:
+                    self.output = output
+
+                self.tmp = '/' + tmp + 'bacch/'
+            else:
+                self.output = 'build/' + workpath
+                self.tmp = self.path + tmp 
+        else:
+            self.output = 'build/' + workpath
+            self.tmp = self.path = tmp
+
+        print("Build output path defined as %s." % self.output)
+
+    ############################################
+    # File Locator
+    def find_file(self,target):
+        for path in self.configscan:
+            if os.path.exists(path + target):
+                if os.isfile(path + target):
+                    return path + target
+        sys.exit("Error: Unable to locate %s file." % target)
+
+
+    ############################################
+    # Class Build Methods
+
+    # XML Builder
+    def build_xml(self):
+        import lxml.etree as ET
+        print("Building project from XML.")
+        
+        root = []
+        standalone = [1,3,5]
+        latex = [3,4,5,6]
+        if self.target in standalone:
+            for key in self.sourcefiles:
+                if key in self.index:
+                    root = [self.sourcefiles[key]]
+                else:
+                    root.append(self.sourcefiles[key])
+        else:
+            for key in self.sourcefiles:
+                if 'xml' in key[-4:]:
+                    root.append(self.sourcefiles[key])
+                
+        # Find Stylesheet
+        if self.target == 1:
+            xsl = self.find_file('standalone-html.xsl')
+        elif self.target == 2:
+            xsl = self.find_file('html.xsl')
+        elif self.target == 3:
+            xsl = self.find_file('standalone-pdf.xsl')
+        elif self.target == 4:
+            xsl = self.find_file('pdf.xsl')
+        elif self.target == 5:
+            xsl = self.find_file('standalone-doc.xsl')
+        elif self.target == 6:
+            xsl = self.find_file('doc.xsl')
+
+        # Find Extension
+        if self.target in [1,2]:
+            extension = 'html'
+        elif self.target in latex:
+            extension = 'tex'
+
+        # Load DOM and Stylesheet
+        for i in root:
+            dom = ET.parse(i)
+            xslt = ET.parse(xsl)
+            transform = ET.XSLT(xslt)
+            output = transform(dom)
+            if self.target in latex:
+                base = self.sourcefiles[i]
+                filename = self.tmp + base[:-3] + extension
+                f = open(filename, 'w')
+                f.write(output)
+                f.close()
+            else:
+                filename = i[:-3] + extension
+                f = open(filename, 'w')
+                f.write(output)
+                f.close()
+
+    # reST Builder
+    def build_rest(self):
+        print("Building project from reStructuredText.")
+
+    ############################################
+    # Class Structural Update Methods
+
+    # XML Struct Updater
+    def struct_xml(self):
+        import lxml.etree as ET
+        print("Updating structure from XML.")
+
+    # reST Struct Updater
+    def struct_rest(self):
+        print("Updating structure from reStructuredText.")
+
+
+    ########################################
+    # Class Database Update Methods
+
+    # XML DB Updater
+    def data_xml(self):
+        import lxml.etree as ET
+        print("Updating database from XML.")
+
+    # reST DB Updater
+    def data_rest(self):
+        print("Updating database from reStructuredText.")
 
 
 
@@ -135,53 +301,39 @@ def read_xml(sourcelist, action):
 # Subparser Functions
 
 # Project Builder
-def builder(arguments, sources, project_type):
+def builder(arguments, thisProject):
     print("Running Project Build")
-
-
-    # Determine if source files are more 
-    #   recent than struct.json
-    status = check_status(source_list, os.listdir('build'))
     
-    if status or arguments.force:
-        print("Starting Project build")
-
-        # Launch Readers
-        if project_type == 1:
-            read_rest(sources, 1)
-        elif project_type == 0:
-            read_xml(sources, 1)
-
+    if thisProject.form == 1:
+        thisProject.build_xml()
+    elif thisProject.form == 2:
+        thisProject.build_rest()
     else:
-        print("Project up to date.")
-    
-    
+        sys.exit("Nothing to do.")
+
+
+
 # Project Strcuture Updater
-def struct(arguments, sources, project_type):
-    print("Running Project Update")
+def struct(arguments, thisProject):
+    print("Running Structural Updater")
 
-
-    # Determine if source files are more 
-    #   recent than struct.json
-    status = check_status(source_list, ["./.struct.json"])
-
-    if status or arguments.force:
-        print("Updating Project struct")
-        
-        # Launch Readers
-        if project_type == 1:
-            read_rest(sources, 0)
-        elif project_type == 2:
-            read_xml(sources, 0)
-
+    if thisProject.form == 1:
+        thisProject.struct_xml()
+    elif thisProject.form == 2:
+        thisProject.struct_rest()
     else:
-        print("Project struct up to date.")
+        sys.exit("Nothing to do.")
 
 
-
-# Project Data
-def data_compiler(arguments):
+# Project Database Updater
+def data_compiler(arguments, thisProject):
     print("Running Project Data Compiler")
+    if thisProject.form == 1:
+        thisProject.data_xml()
+    elif thisProject.form == 2:
+        thisProject.data_rest()
+    else:
+        sys.exit("Nothing to do.")
 
 
 
@@ -195,8 +347,14 @@ def main():
     subparsers = parser.add_subparsers()
 
     # Base Arugments
-    parser.add_argument('-f', '--force', action="store_true")
+    parser.add_argument('--force', action="store_true")
     parser.add_argument('-s','--standalone',action="store_true")
+    parser.add_argument('--set_path')
+    parser.add_argument('--set_config')
+    parser.add_argument('-f','--set_format')
+    parser.add_argument('-o','--output')
+    parser.add_argument('-t', '--target')
+
     
     # Subparser for Building Projects
     build = subparsers.add_parser('build')
@@ -214,17 +372,10 @@ def main():
     args = parser.parse_args()
 
 
-    # Read Source Directory and log files
-    print("Check project directory...\n")
-    source_list = find_source()
-
-    # Classify Project
-    project_type = classify_project(source_list)
-
+    # Initialize Project Class
+    thisProject = Project(args)
 
     # Launch Argument Functions
-    args.func(args, source_list, project_type)
-
-
+    args.func(args, thisProject)
 
 sys.exit(main())
