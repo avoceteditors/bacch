@@ -1,24 +1,22 @@
 # bacch
 
-`bacch` provides a series of utilities to assist writers working in unix-like environments, such as Linux and FreeBSD.  These utilities include presentation, project statistics, and development tools.  It requires Python 3 and the Sphinx documentation builder.
+`bacch` provides a series of utilities to assist writers working in unix-like environments, such as Linux and FreeBSD.  These utilities include presentation, project statistics, and development tools.  It runs on Python 3 and requires Sphinx and lxml for document processing.
 
 
 
 ## Current Development
 
-**Version 0.1** is in active development.  This is the initial version for the project, as such there is no stable branch available.  For the time being you should not use anything in this repo as it either doesn't work or doesn't do anything.
-
-*Note*: For the present, the author can only perform testing in Linux and would appreciate comment on any problems that arise on FreebSD.  Preferably comment that can point to the why and how.
+**Version 0.1**
 
 Feature Goals:
 
-- **Project Builder**: Develop a simplified call system for generate presentation documents from source code.  For this version, focus on implementing the Sphinx build system with HTML output.  Assume that the source directory contains a `conf.py` file, but prepare for when it doesn't.
+- **Project Builder**: System to process source code written reStructuredText/XML to produce HTML, Word documents and PDF's in various formats.
 
-- **Project Updater**: Develop a parser for source files.  This system should read all files in the source directory, sort them based on logical structure noting any files that do not fit into the TOC tree, then create a JSON file at the project root.  For this version focus on reading source files in reStructuredText.
+- **Structure Reader**: Similar to the project builder, this outputs as JSON file that indicates the hierarchical organization of source files, based on toctrees and xincludes.
 
-- **Installation Script**: Develop an installation script that users can run to update their systems with the newest version of bacch.  This system should copy relevant files to their expected locations, (id est, configs to `/etc`, modules to `/usr`, et cetera).  It should also create or update the launch script in `/usr/bin` where necessary.
+- **Installation**: Project requires some form of packaging and installation system, so that it can easily be installed on any given system.
 
-There is no development schedule or fixed release cycle.  There is only one developer on this project and it is undertaken to address his specific needs as a technical writer and aspirant novelist.  When the above features are implemented and stable, it will be noted here and branches created for the next version.
+There is no development schedule or fixed release cycle.  It'll be done when it's done.
 
 ## Release Notes
 
