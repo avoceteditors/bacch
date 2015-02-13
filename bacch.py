@@ -20,12 +20,13 @@
 # Module Imports
 
 import sys, argparse, os, os.path, configparser
+import lxml, lxml.etree, lxml.ElementInclude
+
 
 ####################################
 # Classes
 
 class Project():
-
 
     # Parse Config File
     def parse_config(self, path):
@@ -99,7 +100,7 @@ class Project():
             
         # Build sourcefile dictionary
         for i in os.listdir(self.source):
-            self.sourcefiles[i] = self.path + i
+            self.sourcefiles[i] = self.source + i
 
 
         # Define Format
@@ -201,7 +202,7 @@ class Project():
     def find_file(self,target):
         for path in self.configscan:
             if os.path.exists(path + target):
-                if os.isfile(path + target):
+                if os.path.isfile(path + target):
                     return path + target
         sys.exit("Error: Unable to locate %s file." % target)
 
@@ -211,7 +212,7 @@ class Project():
 
     # XML Builder
     def build_xml(self):
-        import lxml.etree as ET
+
         print("Building project from XML.")
         
         root = []
@@ -248,27 +249,47 @@ class Project():
         elif self.target in latex:
             extension = 'tex'
 
-        # Load DOM and Stylesheet
-        for i in root:
-            dom = ET.parse(i)
-            xslt = ET.parse(xsl)
-            transform = ET.XSLT(xslt)
-            output = transform(dom)
-            if self.target in latex:
-                base = self.sourcefiles[i]
-                filename = self.tmp + base[:-3] + extension
-                f = open(filename, 'w')
-                f.write(output)
-                f.close()
-            else:
-                filename = i[:-3] + extension
-                f = open(filename, 'w')
-                f.write(output)
-                f.close()
+        self.extension = extension
+        self.xsl = xsl
 
+        output = ''
+        if self.target in standalone:
+            self.buildstand_xml()
+        else:
+            self.buildall_xml()
+
+
+    def buildstand_xml(self):
+        print("Running XML Standalone Builder")
+    
+
+    def buildall_xml(self):
+        print("Running XML Master Builder")
+
+        tree = lxml.etree.parse(self.source + '/book.xml')
+        tree.xinclude()
+        xslt = lxml.etree.parse(self.xsl)
+        transform = lxml.etree.XSLT(xslt)
+        output = str(transform(tree))
+
+        if self.extension == 'html':
+            outputfile = self.output + 'master.html'
+            flag = ''
+            if os.path.exists(outputfile):
+                flag = 'w'
+            else:
+                flag = 'x'
+
+            f = open(outputfile, flag)
+            f.write(output)
+            f.close()
+
+            
     # reST Builder
     def build_rest(self):
         print("Building project from reStructuredText.")
+
+
 
     ############################################
     # Class Structural Update Methods
@@ -360,6 +381,7 @@ def main():
     build = subparsers.add_parser('build')
     build.set_defaults(func=builder)
 
+    
     # Subparser for Updating Projects
     update_structure = subparsers.add_parser('struct')
     update_structure.set_defaults(func=struct)
