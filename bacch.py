@@ -9,395 +9,330 @@
 #                                                                #
 # Author: Kenneth P. J. Dyer                                     #
 #                                                                #
-# Version: 0.1                                                   #
+# Version: 0.2                                                   #
 #                                                                #
-# Date: Janauary 2015                                            #
+# Date: March 2015                                               #
 #                                                                #
 ##################################################################
 
 
-#####################################
+###################################
 # Module Imports
-
-import sys, argparse, os, os.path, configparser
+import sys, argparse, os, os.path, configparser, shutil
 import lxml, lxml.etree, lxml.ElementInclude
+import sphinx
 
 
-####################################
-# Classes
+###################################
+# Main Class
 
 class Project():
 
-    # Parse Config File
-    def parse_config(self, path):
-        if path == None:
-            self.title == 'Untitled Project'
-            self.author == 'Unnamed Author'
-            self.work == 'Undefined Project Type'
-        else:
-            config = configparser.ConfigParser()
-            config.read_file(open(path))
+    # Initialize Arguments and Class
+    def __init__(self):
+        self.masthead = "bacch version 0.2" 
+        print(self.masthead)
 
-
-
-    # Initialize Class
-    def __init__(self, args):
-        
-
-        # Initialize Locations
-        sourcelist = [ 'source/',
-                       'src/' ]
-        outputlist = [ 'build/',
-                       'output/']
-        
-        xmlindex = [ 'index.xml',
-                     'book.xml']
-        restindex = [ 'index.rst',
-                     'index.txt']
-        tmp = 'tmp/'
-
-        # Initialize Arugment Variable
-        path = args.set_path
-        form = args.set_format
-        output = args.output
-        target = args.target
-        standalone = args.standalone
-
-        # Initialize Class Variables
-        self.path = ''
-        self.form = 0
-        self.config = ''
-        self.title = ''
-        self.author = ''
-        self.work = ''
+        # Init Project Variables
         self.source = ''
+        self.path = ''
         self.build = ''
-        self.sourcefiles = {}
-        self.target = 0
-        self.index = []
-        home = os.path.expandvars('$HOME')
-
-        self.tmp = ''
-        self.configscan = [ home + '/.config/bacch/' ]
-
+        self.config = ''
+        self.confpy = ''
+        self.project_type = 0
+        self.config_index = ''
         
+        # Init Metadata
+        self.title = 'Untitled'
+        self.subtitle = ''
+        self.author = 'Unknown Author'
+        
+        
+    def init_args(self,args):
+
+        self.verbose = args.verbose
+        self.force = args.force
+        self.buildall = args.buildall
+        self.standalone = args.standalone
 
         # Define Path
+        if self.verbose:
+            print("Defining Program Variables:")
+            print("\tValidating path...")
+        path = args.set_path
         if path:
             if os.path.isdir(path):
                 self.path = path
         else:
             self.path = './'
+        if self.verbose:
+            print("\tSetting path to %s\n" % self.path)
+ 
+        # Set Source
+        self.sourcepath = self.path_checker(
+            0, args.set_source,['src/','source/'], "source")
         
-        # Define Source Path
-        for i in sourcelist:
-            source = self.path + i
-            if os.path.exists(source):
-                if os.path.isdir(source):
-                    self.source = source
-        if not self.source:
-            sys.exit("Error: No source directory.")
-            
-        # Build sourcefile dictionary
-        for i in os.listdir(self.source):
-            self.sourcefiles[i] = self.source + i
+        # Set Build
+        self.buildpath = self.path_checker(
+            0, args.set_build, ['build/'], 'build')
 
+        # Find Default Files
+        self.config = self.path_checker(
+            1, args.set_config, ['.config'], 'config')
+        self.config_reader()
 
-        # Define Format
-        if form:
-            if form.lower() == 'xml':
-                print("Reading project as XML.")
-                self.index = xmlindex
-                self.form = 1
-            elif form.lower() == 'rst':
-                print("Reading project as reStructuredText")
-                self.index = restindex
-                self.form = 2
-            elif form.lower() == 'rest':
-                print("Reading project as reStructuredText")
-                self.index = restindex
-                self.form = 2
+        # Determine Project Type:
+        self.source_classifier(args.read_format)
 
-            elif form.lower() == 'restructuredtext':
-                print("Reading project as reStructuredText")
-                self.index = restindex
-                self.form = 2
-            else:
-                sys.exit("Error: Invalid read format.")
+        self.reader = args.read_format
+        self.target = args.target_format
 
+        
+        # Launch Processor
+        if args.task == 'build': 
+            self.builder()
+        elif args.task == 'struct':
+            self.struct()
+        elif args.task == 'data':
+            self.data()
         else:
-            listing = os.listdir(self.source)
-            xml = rest = 0
-            for key in self.sourcefiles:
-                extension = str(self.sourcefiles[i])[-4:]
-                if 'xml' in extension:
+            print("Error: Invalid Task")
+            sys.exit(1)
+
+
+    # Path Checker
+    def path_checker(self, check, checkpath, defaults, name):
+        
+        if self.verbose:
+            print("\tValidating %s path..." % name)
+        result = ''
+        if checkpath:
+            if os.path.isdir(checkpath) or os.path.isfile(checkpath):
+                result = checkpath
+        else:
+            for i in defaults:
+                check = self.path + i
+                if os.path.exists(check):
+                    result = check
+                    break
+            if result == '':
+                result = self.path + defaults[0]
+                if check == 0:
+                    os.mkdir(result)
+                elif check == 1:
+                    with open(path, defaults[0]):
+                        os.utime(path, None)
+
+            if self.verbose:
+                print('\tPath to %s not found.' % name )
+                print('\tCreating %s' % result)
+                print('\tSetting %s to %s\n' % (name, result))
+            return result
+                    
+        if self.verbose:
+            print("\tSetting %s to %s\n" % (name, result))
+            return result
+                
+    # File Checker
+    def file_checker(self, path):
+        paths = [path, self.sourcepath + '/' + path]
+        result = ''
+        for i in paths:
+            if os.path.exists(i):
+                if os.path.isfile(i):
+                    result = i
+                    break
+        
+        return result
+                    
+    # Config Reader
+    def config_reader(self):
+        if self.verbose:
+            print('Reading Configuration File at %s' % self.config)
+        config = configparser.ConfigParser()
+        config.read_file(open(self.config))
+
+        # Set Metadata
+        self.title = self.set_config(config, 'Metadata', 'title')
+        self.subtitle = self.set_config(config, 'Metadata', 'subtitle')
+        self.author_full = self.set_config(config,'Metadata','author_full')
+        self.author_sur = self.set_config(config,'Metadata','author_sur')
+
+        # Set Project Data
+        self.source_type = self.set_config(config, 'Project','source_type')
+        self.project_type = self.set_config(config,'Project','project_type')
+        self.confpy = self.set_config(config,'Project', 'confpy')
+        self.config_index = self.set_config(config,'Project','index')
+        
+    def set_config(self, parser, unit, value):
+        try:
+            return parser[unit][value]
+        except:
+            return "Unknown"
+
+    # Project Classification
+    def source_classifier(self,argument):
+        if self.verbose:
+            print("Source file classification:")
+
+
+        if argument != None:
+            if self.verbose:
+                print("\tSource files classified as %s" % argument)
+            self.source_type = argument.lowercase()
+        elif self.source_type == "Unknown":
+            if self.verbose:
+                print("\tSource files unlcassified by %s" % self.config)
+                print("\tDetermining source file classification...")
+            listing = os.listdir(self.sourcepath)
+            xml = rst = 0    
+            for i in listing:
+                if i[-3:] == 'xml':
                     xml = xml + 1
-                elif 'rst' in extension:
-                    rest = rest + 1
-
-            if xml > rest:
-                print("Reading project as XML.")
-                self.index = xmlindex
-                self.form = 1
-            elif xml < rest:
-                print("Reading project as reStructuredText")
-                self.index = restindex
-                self.form = 2
+                elif i[-3:] == 'rst':
+                    rst = rst + 1
+                    
+            # Check Results
+            if rst > xml:
+                self.source_type = 'rst'
+            elif rst < xml:
+                self.source_type = 'xml'
             else:
-                sys.exit("Error: Unable to determine read format.\n \t Consider using bacch with the --set_format option.\n")
+                print("Error: Unable to determine source file classification.")
+                sys.exit(1)
+                
+        # Source Classification
+        if self.verbose:
+            print("\tSource files classified as %s" % self.source_type)
+            
+
+        # Find Stylesheet and conf.py
+        if self.verbose:
+            print("Locating extended configuration file")
+
+        if self.source_type == 'rst':
+            
+            paths = [ os.environ['HOME'] + '/repo/bacch/config/conf.py',
+                      os.environ['HOME'] + '/.config/bacch/conf.py',
+                      '/usr/share/bacch/conf.py']
+
+            check = self.sourcepath + '/conf.py'
+            if not os.path.exists(check):
+                for i in paths:
+                    if os.path.exists(i):
+                        shutil.copyfile(i, check)
+                        break
+            
+                      
+            if self.verbose:
+                print("\tExtended configuration file identified as %s\n" % self.confpy)
+
+        # Find Start Position
+        if self.verbose:
+            print("Start Position:")
+
+        if self.config_index != 'Unknown':
+            self.index = self.file_checker(self.config_index)
+
+        elif self.source_type == 'rst':
+            listing = os.listdir(self.sourcepath)
+            index = ['index.rst', 'index.txt', 'book.rst']
+            for i in index:
+                if i in listing:
+                    self.index = self.file_checker(i)
+                    break
+        elif self.source_type == 'xml':
+            listing = os.listdir(self.sourcepath)
+            index = ['index.xml', 'book.xml']
+            for i in index:
+                if i in listing:
+                    self.index = self.file_checker(i)
+                    break        
+        if self.verbose:
+            print("\tSetting start position at %s\n" % self.index)
+
+    #########################################        
+    # Builder Method
+    def builder(self):
+        print("Initializing Builder")
+
+        # Determine Output Format
+        if self.verbose:
+            print("Determining build output format:")
+        output_format = 'html'
+        if self.target != None:
+            output_format = self.target.lower()
+            listing = ['html', 'pdf', 'docx']
+            if target not in listing:
+                print("Error: Unidentified target output format.")
+                sys.exit(1)
+        if self.verbose:
+            print("\tSetting target output to %s\n" % output_format)
+        self.target = output_format
+            
+        # reStructuredText Builder
+        if self.source_type == 'rst':
+            self.rst_builder()
+            
+        # XML Builder
+        elif self.source_type == 'xml':
+            self.xml_builder()
+            
+    #############################################    
+    # Struct Method
+    def struct(self):
+        print("Initializing Structural Reader")
+
+    #############################################
+    # Data Method
+    def data(self):
+        print("Initializing Data Reader")
 
 
 
-        # Set Output Format
-        workpath = ''
-        if target:
-            if target == 'html'.lower() and standalone:
-                print("Defining Output as Standalone HTML.")
-                self.target = 1
-            elif target == 'html'.lower():
-                print("Defining Output as HTML")
-                workpath = 'html/'
-                self.target = 2
-            elif target == 'pdf'.lower() and standalone:
-                print("Defining Output as Standalone PDF.")
-                self.target = 3
-            elif target == 'pdf'.lower():
-                print("Defining Output as Chapter Formatted PDF")
-                workpath = 'pdf/'
-                self.target = 4
-            elif target == 'docx'.lower() or target == 'doc':
-                if standalone:
-                    print("Defining Output as Standalone Microsoft Word Document")
-                    self.target = 5
-                else:
-                    print("Defining Output as Chapter Formatted Microsoft Word Document")
-                    workpath = 'word/'
-                    self.target = 6
-        else:
-            print("Defining Output as HTML")
-            self.target = 2
-
-
-
-        # Define Build Path
-        if output:
-            if os.path.isdir(output):
-                if output[-1] != '/':
-                    self.output = output + '/'
-                else:
-                    self.output = output
-
-                self.tmp = '/' + tmp + 'bacch/'
-            else:
-                self.output = 'build/' + workpath
-                self.tmp = self.path + tmp 
-        else:
-            self.output = 'build/' + workpath
-            self.tmp = self.path = tmp
-
-        print("Build output path defined as %s." % self.output)
-
-    ############################################
-    # File Locator
-    def find_file(self,target):
-        for path in self.configscan:
-            if os.path.exists(path + target):
-                if os.path.isfile(path + target):
-                    return path + target
-        sys.exit("Error: Unable to locate %s file." % target)
-
-
-    ############################################
-    # Class Build Methods
+    #############################################
+    # Builder Methods
+        
+    # reStructuredText Builder
+    def rst_builder(self):
+        print("Initializing Sphinx")
+        options = ['','-b',self.target]
+        if self.buildall:
+            options.append('-a')
+        arguments = options + [self.sourcepath, self.buildpath]
+           
+        sphinx.main(arguments)
 
     # XML Builder
-    def build_xml(self):
-
-        print("Building project from XML.")
+    def xml_builder(self):
+        print("Initializing XML Builder")
         
-        root = []
-        standalone = [1,3,5]
-        latex = [3,4,5,6]
-        if self.target in standalone:
-            for key in self.sourcefiles:
-                if key in self.index:
-                    root = [self.sourcefiles[key]]
-                else:
-                    root.append(self.sourcefiles[key])
-        else:
-            for key in self.sourcefiles:
-                if 'xml' in key[-4:]:
-                    root.append(self.sourcefiles[key])
-                
-        # Find Stylesheet
-        if self.target == 1:
-            xsl = self.find_file('standalone-html.xsl')
-        elif self.target == 2:
-            xsl = self.find_file('html.xsl')
-        elif self.target == 3:
-            xsl = self.find_file('standalone-pdf.xsl')
-        elif self.target == 4:
-            xsl = self.find_file('pdf.xsl')
-        elif self.target == 5:
-            xsl = self.find_file('standalone-doc.xsl')
-        elif self.target == 6:
-            xsl = self.find_file('doc.xsl')
+##################################
+# Initialize Main Process
+if __name__ == '__main__':
+    # Initialize Class
+    thisProject = Project()
+    run = 0
 
-        # Find Extension
-        if self.target in [1,2]:
-            extension = 'html'
-        elif self.target in latex:
-            extension = 'tex'
-
-        self.extension = extension
-        self.xsl = xsl
-
-        output = ''
-        if self.target in standalone:
-            self.buildstand_xml()
-        else:
-            self.buildall_xml()
-
-
-    def buildstand_xml(self):
-        print("Running XML Standalone Builder")
-    
-
-    def buildall_xml(self):
-        print("Running XML Master Builder")
-
-        tree = lxml.etree.parse(self.source + '/book.xml')
-        tree.xinclude()
-        xslt = lxml.etree.parse(self.xsl)
-        transform = lxml.etree.XSLT(xslt)
-        output = str(transform(tree))
-
-        if self.extension == 'html':
-            outputfile = self.output + 'master.html'
-            flag = ''
-            if os.path.exists(outputfile):
-                flag = 'w'
-            else:
-                flag = 'x'
-
-            f = open(outputfile, flag)
-            f.write(output)
-            f.close()
-
-            
-    # reST Builder
-    def build_rest(self):
-        print("Building project from reStructuredText.")
-
-
-
-    ############################################
-    # Class Structural Update Methods
-
-    # XML Struct Updater
-    def struct_xml(self):
-        import lxml.etree as ET
-        print("Updating structure from XML.")
-
-    # reST Struct Updater
-    def struct_rest(self):
-        print("Updating structure from reStructuredText.")
-
-
-    ########################################
-    # Class Database Update Methods
-
-    # XML DB Updater
-    def data_xml(self):
-        import lxml.etree as ET
-        print("Updating database from XML.")
-
-    # reST DB Updater
-    def data_rest(self):
-        print("Updating database from reStructuredText.")
-
-
-
-####################################
-# Subparser Functions
-
-# Project Builder
-def builder(arguments, thisProject):
-    print("Running Project Build")
-    
-    if thisProject.form == 1:
-        thisProject.build_xml()
-    elif thisProject.form == 2:
-        thisProject.build_rest()
-    else:
-        sys.exit("Nothing to do.")
-
-
-
-# Project Strcuture Updater
-def struct(arguments, thisProject):
-    print("Running Structural Updater")
-
-    if thisProject.form == 1:
-        thisProject.struct_xml()
-    elif thisProject.form == 2:
-        thisProject.struct_rest()
-    else:
-        sys.exit("Nothing to do.")
-
-
-# Project Database Updater
-def data_compiler(arguments, thisProject):
-    print("Running Project Data Compiler")
-    if thisProject.form == 1:
-        thisProject.data_xml()
-    elif thisProject.form == 2:
-        thisProject.data_rest()
-    else:
-        sys.exit("Nothing to do.")
-
-
-
-#####################################
-# Main Function
-
-def main():
-    print("Initializing bacch")
-
+    # Initialize Argument Parser
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
-
-    # Base Arugments
+    
+    # Base Arguments
+    parser.add_argument('task',
+                        choices = ['build', 'struct', 'data'] )
     parser.add_argument('--force', action="store_true")
-    parser.add_argument('-s','--standalone',action="store_true")
+    parser.add_argument('-v', '--verbose', action="store_true")
     parser.add_argument('--set_path')
     parser.add_argument('--set_config')
-    parser.add_argument('-f','--set_format')
-    parser.add_argument('-o','--output')
-    parser.add_argument('-t', '--target')
+    parser.add_argument('--set_source')
+    parser.add_argument('--set_build')
+    parser.add_argument('-a', '--buildall')
+    parser.add_argument('-s','--standalone')
+    parser.add_argument('-r','--read_format')
+    parser.add_argument('-t','--target_format')
 
-    
-    # Subparser for Building Projects
-    build = subparsers.add_parser('build')
-    build.set_defaults(func=builder)
-
-    
-    # Subparser for Updating Projects
-    update_structure = subparsers.add_parser('struct')
-    update_structure.set_defaults(func=struct)
-
-    # Subparser for Data Functions
-    dataread = subparsers.add_parser('data')
-    dataread.set_defaults(func=data_compiler)
-
-    # Parse Arguments and Call Relevant Functions
-    args = parser.parse_args()
+    # Parse Arguments
+    arguments = parser.parse_args()
+    sys.exit(thisProject.init_args(arguments))
 
 
-    # Initialize Project Class
-    thisProject = Project(args)
-
-    # Launch Argument Functions
-    args.func(args, thisProject)
-
-sys.exit(main())
