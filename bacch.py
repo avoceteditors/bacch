@@ -262,7 +262,7 @@ class Project():
         output_format = 'html'
         if self.target != None:
             output_format = self.target.lower()
-            listing = ['html', 'pdf', 'docx']
+            listing = ['html', 'pdf', 'docx','book']
             if target not in listing:
                 print("Error: Unidentified target output format.")
                 sys.exit(1)
