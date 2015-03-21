@@ -151,51 +151,67 @@ class BacchTranslator(nodes.NodeVisitor):
         self.body.append('\n')
 
     def visit_section(self,node):
-        if self.is_toplevel_section(node):
-            pass
-        elif self.is_new_chapter(node):
-            self.body.append(self.new_chapter(node))
-        else:
-            self.body.append('\n\\newscene\n')
+        # Establish Default Subsection
+        element = 'subsection'
+        parent_start = ''
 
-    def is_toplevel_section(self,node):
-        if isinstance(node.parent,nodes.document) and 'docname' in node.parent:
-            return True
-        else:
-            return False
+        # Identify First Level Elements
+        if isinstance(node.parent,nodes.document):
+            # Discern Chapters from Index
+            parent_start = str(node.parent)[0:26]
+            if 'index' not in parent_start:
+                self.generate_header(node,"chapter")
+        
+        # Identify Second Level Elements
+        elif isinstance(node.parent.parent,nodes.document):
+            parent_start = str(node.parent.parent)[0:26]
+            if 'index' in parent_start:
+                self.generate_header(node, "part")
+            else:
+                self.generate_header(node, "section")
 
-    def is_new_chapter(self,node):
-        if self.config.bacch_novel:
-            # For multi-file novel with toctree directive
-            if isinstance(node.parent,nodes.document):
-                return True
-            # For Single-file novel with chapters correctly nested
-            elif isinstance(node.parent.parent,nodes.document) and 'docname' in node.parent.parent:
-                return True
-        else:
-            return False
+        elif isinstance(node.parent.parent.parent,nodes.document):
+            parent_start = str(node.parent.parent.parent)[0:26]
+            if 'index' in parent_start:
+                self.generate_header(node,"chapter")
+            else:
+                self.generate_header(node,"subsection")
 
-    def new_chapter(self,node):
-        sn = node.next_node(condition = suppress_numbering)
-        if isinstance(sn, suppress_numbering) and sn.parent is node:
-            sn = '*'
-        else:
-            sn = ''
-
+    def generate_header(self,node,headertype):
+        # Prepare and append Element
         title = node.next_node()
-        if isinstance(title, nodes.title):
-            return '\n\chapter %s {%s}\n' % (sn, title.astext())
+        header = ""
+       
+
+        if isinstance(title,nodes.title):
+            title = title.astext()
+            if headertype == "part":
+                header = ("\\part*{%s}\n") % title
+            elif headertype == "chapter":
+                header = ("\\chapter*{%s}\n"
+                ) % title
+            elif headertype == "section":
+                header = "\\section*{%s}" % title
+            elif headertype == "subsection":
+                header = "\\subsection*{%s}" % title
+            self.body.append(header)
         else:
             return SyntaxError(
-                "This chapter does not have a title."
-                "That should not be possible...")
+                "This %s does not have a title."
+                "That should not be possible..." % header) 
+
+
 
     def depart_section(self,node):
         pass
 
     def visit_document(self,node):
         self.body.append(self.header.astext())
-        self.body.append('\\begin{document}\n')
+        self.body.append(
+            '\\begin{document}\n'
+            '\\maketitle\n'
+            '\\setcounter{tocdepth}{1}'
+            '\\tableofcontents\n')
 
     def depart_document(self,node):
         self.body.append('\n\\end{document}\n')
@@ -447,15 +463,30 @@ class BacchHeader(object):
 
         options_str = ''
         if len(options) > 0:
-            options_str = '[ %s ]' % (','.join(options))
-        self.header.append('\\documentclass %s {%s}' % (options_str,'bacch'))
+            options_str = '[%s]' % (','.join(options))
+        self.header.append('\\documentclass%s{%s}' % (options_str,'book'))
+        
+        base = ['\\usepackage{hyperref}\n',
+                '\\usepackage[explicit]{titlesec}\n',
+                "\\usepackage{indentfirst}\n",
+                "\\usepackage{titletoc}\n"
+            ]
+        base.append("\\titleformat{\\chapter}[display]\n"
+                    "{}{}{0pt}{} \n")
+        base.append("\\titleformat{\\section} \n"
+                    "{}{}{0pt}{} \n")
+        base.append("\\titleformat{\\subsection} \n"
+                    "{}{}{0.5 \\baselineskip}{} \n")
+                        
+        for i in base:
+            self.header.append(i)
 
     def set_command(self,name,value,typ=str,required=False):
         """
         Handler for simple header commands.  String option \surname{Smith}.
         Boolean options \frenchspacing
         """
-
+    
         if value and isinstance(value,typ):
             if isinstance(value,str):
                 self.header.append('\\%s{%s}' % (name,value))
@@ -464,7 +495,7 @@ class BacchHeader(object):
             elif required:
                 raise ValueError("You must provide a valid %s in your conf.py"
                                  % name)
-
+        
     def set_address(self):
         """
         Sets the address properly.
@@ -515,7 +546,7 @@ def add_nodes(app):
                  latex = (pass_me,pass_me),
                  text = (pass_me, pass_me),
                  man = (pass_me,pass_me))
-    app.add_directive('suppress_numbering', BacchSynopsisDirective)
+    app.add_directive('suppress_synopsis', BacchSynopsisDirective)
 
     # Add two inline styles thought and textsc
     app.add_node(thought,
@@ -638,6 +669,7 @@ def setup(app):
     # Doublespace versus single-spacing
     app.add_config_value('bacch_doublespace_verse',False,'')
 
-
+    # Whether you want to include parts
+    app.add_config_value('bacch_include_parts',False,'')
 
 
