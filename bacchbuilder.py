@@ -2,7 +2,7 @@
 
 ######################################
 # Module Imports
-import codecs, os.path,re
+import codecs, os.path,re, subprocess
 
 from sphinx.builders import Builder
 from sphinx.util.osutil import ensuredir, os_path
@@ -63,6 +63,7 @@ class BacchBuilder(Builder):
         outfile = os.path.join(self.outdir,os_path(self.config.master_doc) + self.extension)
         ensuredir(os.path.dirname(outfile))
         self.write_file(outfile,self.writer.output)
+        self.generate_pdf(outfile)
         self.info("Done")
 
     def assemble_doctree(self):
@@ -94,6 +95,10 @@ class BacchBuilder(Builder):
         except (IOError,OSError) as err:
             self.warn("Error writing file %s: %s" % (outfile, err))
 
+    def generate_pdf(self,outfile):
+        subprocess.call(['pdflatex','build/index.tex'])
+
+
 
 class BacchWriter(writers.Writer):
     """
@@ -119,8 +124,9 @@ class BacchTranslator(nodes.NodeVisitor):
 
     def __init__(self,document,config):
         nodes.NodeVisitor.__init__(self,document)
+        self.current_chapter = ''
+        self.chapheader = {}
         self.config = config
-        self.header = BacchHeader(config)
         self.assign_node_handlers()
 
     def astext(self):
@@ -181,19 +187,35 @@ class BacchTranslator(nodes.NodeVisitor):
         # Prepare and append Element
         title = node.next_node()
         header = ""
-       
+        
 
         if isinstance(title,nodes.title):
             title = title.astext()
             if headertype == "part":
-                header = ("\\part*{%s}\n") % title
+                header = ("\\part*{%s}\n"
+                          "\n") % (title)
             elif headertype == "chapter":
-                header = ("\\chapter*{%s}\n"
-                ) % title
+                command = title.replace(" ","")
+                header = (
+                    "\\newpage\n"
+                    "\\chapter*{%s}\n"
+                    "\\phantomsection"
+                    "\\addcontentsline{toc}{chapter}"
+                    "{\\protect \\normalsize \\textbf{--%s}}\n"
+                    "\\singlespacing\n"
+                    "\\textbf{"
+                    "\\scriptsize\\%s}"
+                    "\\vspace{2em} \n"
+                    "\n \\noindent" ) % (title, title, command)
+                
+                self.current_chapter = title
+                self.chapheader[title] = [title] 
             elif headertype == "section":
                 header = "\\section*{%s}" % title
+                self.chapheader[self.current_chapter].append(title)
             elif headertype == "subsection":
                 header = "\\subsection*{%s}" % title
+                self.chapheader[self.current_chapter].append(title)
             self.body.append(header)
         else:
             return SyntaxError(
@@ -206,14 +228,41 @@ class BacchTranslator(nodes.NodeVisitor):
         pass
 
     def visit_document(self,node):
-        self.body.append(self.header.astext())
-        self.body.append(
-            '\\begin{document}\n'
-            '\\maketitle\n'
-            '\\setcounter{tocdepth}{1}'
-            '\\tableofcontents\n')
+        #self.body.append(self.header.astext())
+        start = []
+        # Begin Document
+        start.append("\\begin{document}\n")
+
+        # Title Page
+        start.append("\\begin{titlepage}\n"
+                     
+                     "\\begin{center}\n\n"
+                     "\\HRuleFull\\par"
+                     "\\vspace{5em}"
+                     "\\bfseries \\Huge"
+                     "\\textrm{\\ShowUpTitle}\\par"
+                     "\n\n"
+                     "\\vspace{8em}\\large\n"
+                     "\\textrm{\\emph{\\ShowSubtitle}}\n\n"
+                     "\\vspace{5em}\\Large\n"
+                     "\\ShowAuthor\n"
+                     "\\vspace{1.5em}\n"
+                     "\\HRuleFull\n\n"
+                     "\\end{center}\n"
+                     "\\end{titlepage}\n")
+
+
+        # Create Table of Contents
+        start.append(""
+                     "\\setcounter{tocdepth}{5}\n"
+                     "\\tableofcontents \n")
+        for i in start:
+            self.body.append(i)
+
 
     def depart_document(self,node):
+        self.header = BacchHeader(self.config,self.chapheader)
+        self.body.insert(0,self.header.astext())
         self.body.append('\n\\end{document}\n')
 
     def visit_strong(self,node):
@@ -394,9 +443,10 @@ class BacchHeader(object):
     and other LaTeX header commands from conf.py for bacch.
     """
     header = []
-
-    def __init__(self,config):
+    def __init__(self,config,chapheader):
         self.config = config
+        self.chapheader = chapheader
+
 
     def astext(self):
         """
@@ -408,12 +458,11 @@ class BacchHeader(object):
         self.set_command('runningtitle',self.config.bacch_runningtitle)
         self.set_command('author',self.config.bacch_author)
         self.set_command('authorname',self.config.bacch_authorname)
-        self.set_command('surname',self.config.bacch_surname)
+        #self.set_command('surname',self.config.bacch_surname)
         self.set_address()
         self.set_wordcount()
         self.set_command('frenchspacing',self.config.bacch_frenchspacing,typ=bool)
         self.set_command('disposable',self.config.bacch_disposable, typ=bool)
-        self.set_command('sceneseparator',self.config.bacch_sceneseparator)
         self.header.append('\n')
         return '\n'.join(self.header)
 
@@ -421,7 +470,7 @@ class BacchHeader(object):
         """
         Handles all options set for document class.
         """
-        options = []
+        options = ['12pt','operight','pdftex']
 
         if self.config.bacch_nonsubmission:
             options.append('nonsubmission')
@@ -453,8 +502,9 @@ class BacchHeader(object):
         # Paper Sizes
         papersize = self.config.bacch_papersize
         if papersize == None:
-            pass
-        elif papersize in ['a4paper', 'letterpaper']:
+            options.append('geometry')
+            options.append('b5paper')
+        elif papersize in ['a4paper', 'letterpaper','b4paper']:
             options.append('geometry')
             options.append(papersize)
         else:
@@ -464,22 +514,106 @@ class BacchHeader(object):
         options_str = ''
         if len(options) > 0:
             options_str = '[%s]' % (','.join(options))
+        
         self.header.append('\\documentclass%s{%s}' % (options_str,'book'))
         
         base = ['\\usepackage{hyperref}\n',
-                '\\usepackage[explicit]{titlesec}\n',
-                "\\usepackage{indentfirst}\n",
+                '\\usepackage[explicit, noindentafter]{titlesec}\n',
                 "\\usepackage{titletoc}\n"
+                "\\usepackage{fancyhdr}\n"
+                "\\usepackage{setspace}\n"
+                #"\\usepackage{showframe}\n"
             ]
-        base.append("\\titleformat{\\chapter}[display]\n"
-                    "{}{}{0pt}{} \n")
-        base.append("\\titleformat{\\section} \n"
-                    "{}{}{0pt}{} \n")
-        base.append("\\titleformat{\\subsection} \n"
-                    "{}{}{0.5 \\baselineskip}{} \n")
+        if self.config.bacch_submission_type == 'manuscript':
+            base.append("\\usepackage["
+                        "letterpaper"
+                        "]{geometry} \n")
+        else:
+            base.append("\\usepackage["
+                        "b5paper"
+                        "]{geometry} \n")
+
+        # Define Metadata
+        title = self.config.bacch_title
+        if title == None: title = "Untitled"
+        base.append("\\newcommand{\\ShowTitle}{%s}\n" % title)
+        base.append("\\newcommand{\\ShowUpTitle}{%s}\n" % title.upper())
+
+        subtitle = self.config.bacch_subtitle
+        if subtitle == None: subtitle = ""
+        base.append("\\newcommand{\\ShowSubtitle}{%s}\n" % subtitle)
+
+        surname = self.config.bacch_surname
+        if surname == None: surname = ""
+        base.append("\\newcommand{\\ShowSurname}{%s}\n" %surname)
+
+        author = self.config.bacch_author
+        if author == None: author = ''
+        base.append("\\newcommand{\\ShowAuthor}{%s}\n" % author)
+
+        # Page Style
+        base.append("\\pagestyle{fancy}\n"
+                    "\\fancyhead{}\n"
+                    "\\fancyfoot{}\n")
+        base.append("\\fancyfoot[RO,LE]{ \n"
+                    "\\thepage"
+                    "} \n")
+        base.append("\\fancyhead[RO,LE]{ \n"
+                    "\\tiny \\emph{\\ShowTitle} \\vspace{0.25em}\n"
+                    "} \n")
+        base.append("\\fancyhead[LE]{ \n"
+                    "\\tiny \\ShowSurname \\vspace{0.25em}\n"
+                    "} \n")
+        #base.append("\\onehalfspacing\n")
+
+        # LaTeX Commands
+        base.append("\\newcommand{\\HRuleBreak}{ \n"
+                    "\\rule{5em}{0.25mm}"
+                    "}\n")
+        base.append("\\newcommand{\\HRuleFull}{ \n"
+                    "\\rule{\\linewidth}{0.5mm}"
+                    "} \n")
+
+        # Format Header
+        base.append("\\titleclass{\\part}{page}\n"
+                    "\\titleformat{\\part}\n"
+                    "{\\Huge}{\\thepart}{}\n"
+                    "{\\centering \\uppercase{\\textrm{\\textbf{#1}}}}\n"
+                    "\n")
+
+        base.append("\\titleclass{\\chapter}{straight}\n"
+                    "\\titleformat{\\chapter}\n"
+                    "{}{\\thechapter}{}{}\n"
+                    "\\titlespacing{\\chapter}\n"
+                    "{\\parindent}{\\baselineskip}{-2em}"
+                    "\n")
+
+        base.append("\\titleclass{\\section}{straight}\n"
+                    "\\titleformat{\\section}\n"
+                    "{}{\\thesection}{}{\\centering \\HRuleBreak} \n"
+                    "\\titlespacing{\\section}\n"
+                    "{\\parindent}{1em}{1em}"
+                    "\n")
+        base.append("\\titleclass{\\subsection}{straight}\n"
+                    "\\titleformat{\\subsection}\n"
+                    "{}{\\thesubsection}{}{} \n"
+                    "\\titlespacing{\\subsection}\n"
+                    "{\\parindent}{\\baselineskip}{-1em}"
+                    "\n")
+        for key in self.chapheader:
+            command = self.generate_chaphead(key, self.chapheader[key])
+            base.append(command)
                         
         for i in base:
             self.header.append(i)
+    
+
+    def generate_chaphead(self, header, titles):
+        separator = ' -- '
+        title = separator.join(titles) + "."
+        header = header.replace(" ","")
+        return "\\newcommand{\\%s}{%s} \n" % (header,title)
+
 
     def set_command(self,name,value,typ=str,required=False):
         """
@@ -648,6 +782,9 @@ def setup(app):
     # Set title in running header, overriding the title
     app.add_config_value('bacch_runningtitle', None, '')
 
+    # Set subtitle
+    app.add_config_value('bacch_subtitle',None,'')
+
     # Set real name
     app.add_config_value('bacch_authorname', None, '')
 
@@ -671,5 +808,8 @@ def setup(app):
 
     # Whether you want to include parts
     app.add_config_value('bacch_include_parts',False,'')
+
+    # Definte Chapter header separate
+    app.add_config_value('bacch_chap_sep',None, '')
 
 
