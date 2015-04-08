@@ -4,21 +4,20 @@
 # Module Imports
 import sys, os, os.path
 
+###############################
+# bacch Configurations
 
-
-##################################
-# General Configurations
-
-sys.path.insert(0,'/home/kbapheus/repos/bacch/')
+bacch_sourcedir = '~/repos/bacch/'
+sys.path.insert(0,bacch_sourcedir)
 
 # Sphinx Extensions
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'bacchbuilder'
-]
-title = "untitled"
+    'bacchbuilder',
+    'bacchbuilder-new']
+
 # Templates
 templates_path = ['_templates']
 
@@ -33,7 +32,5 @@ master_doc = 'index'
 
 
 
-# Bacch Configurations
-bacch_title = "untitled"
-bacch_frenchspacing = True
-bacch_novel = True
+
+
