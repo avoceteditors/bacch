@@ -1,12 +1,6 @@
 # bacch
 
-`bacch` provides a build system for novelists working in unix-like environments, such as Linux and FreeBSD.  It allows the writer to work in simple markup languages, keeping the writing process separate from formatting and typesetting concerns.
-
-Technical writers will note a familiar tune in this workflow.  Build systems originate in a desire for greater efficiency to the writing process -- especially, when dealing with particularly large projects, such as nine hundred pages of software documentation.
-
-The word processor, while effective in dealing with small documents, does not scale appropriately to larger projects.  That's why docs writers generally don't use them.  Whatever you gain from a word processor you lose in wasted time and missed deadlines.  Build systems allow you to turn the entire typesetting process over to the computer, compiling the various files into a single, properly formatted document.
-
-`bacch` adapts and improves upon existing technologies typically used only in software documentation.  Its goal is to simplify these tools, making it easier to set up projects and format the final document.
+`bacch` provides a build system for novelists working in unix-like environments, such as Linux and FreeBSD.  It allows the writer to work in simple markup languages, keeping the writing process separate from formatting and typesetting concerns. It adapts and improves upon existing technologies typically used only in software documentation.  Its goal is to simplify these tools, making it easier to set up projects and format the final document.
 
 It is written in Python 3.4.3 and uses Sphinx 1.2.3, lxml and LaTeX.  It supports reStructuredText and DocBook XML as source formats.
 
