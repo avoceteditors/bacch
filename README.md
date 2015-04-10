@@ -1,8 +1,10 @@
 # bacch
 
-`bacch` provides a command-line build system for writers working in unix-like environments -- such as Linux, FreeBSD and Mac OS X.  It allows writers to work on plain text files, using simple markup, to generate quality PDF's for presentation and distribution purposes.
+Do you like to write?  Do you do your writing in a unix-like environment -- such as Linux, FreeBSD and Mac OS X? `bacch` provides a command-line build system for writers, especially novelists, looking to move away from the cumbersome feature bloat of word processors into a more streamlined plain text markup-based workflow.
 
-This system extends existing technologies used in documentation writing, with an eye towards simplifying setup, configuration and use.  It is written in Python 3.4.3 and requires Sphinx, lxml and LaTeX, (a complete list of dependencies will be added at a later date).
+In particular, `bacch` separates the writing process from typesetting concerns, so you can focus on the text without the distraction of how it looks and without losing the ability to share quality PDF's for presentation and distribution purposes.  The build system is an extension on existing technologies current used in software documentation, adapted for the fiction writer with an eye towards simplifying setup, use and configuration.
+
+It is written in Python 3.4.3 and requires Sphinx, lxml and LaTeX.
 
 ## Current Development
 
@@ -22,12 +24,16 @@ For the time being, `bacch` remains in active development.  The following featur
 
 - **Package Support**: System to automate the installation and update process.
 
+For the moment, there is no development schedule for this project, but all these features and a few more besides are necessary before it advances to version 1.x.
 
-## An Explanation of the Name
 
-The program is being developed under the label Dionysiac Endeavors.  This label was chosen with a nod to the dualism of Friedrich Nietzsche in his work *The Birth of Tragedy* and the traditions of jazz.  To develop a structural apolline approach or arrangement that allows for greater improvisation and other cultivations of dionysiac influences in the work.
+## Explanation of the Name
 
-`bacch` derives from Bacchus, the Roman name for Dionysus.
+The program is developed under the label Dionysiac Endeavors.  This was chosen with a nod to the dualism Friedrich Nietzsche lays out in his book *The Birth of Tragedy from the Spirit of Music* and to the jazz traditions in music. The root goal of D.E. is to develop tools that facilitate a balance between the two sides.  That is, apollonian approach to enabling and cultivating dionysiac endeavors -- the way a jazz arrangements use structure to accent the improvisation.
+
+The name `bacch` derives from Bacchus, the Roman name for Dionysus.  It facilitates this goal by removing the obsessive tinkering with fonts and page layouts and the tedium of going back and doing it again when something doesn't quite fit.
+
+The entire book's formatting is relegated to the build system, handled through a basic configuration file -- so that the writer's focus can remain fixed instead upon the text.
 
 
 ## Release Notes
