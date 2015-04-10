@@ -7,7 +7,8 @@ import sys, os, os.path
 ###############################
 # bacch Configurations
 
-bacch_sourcedir = '~/repos/bacch/'
+bacch_sourcedir = '/usr/share/bacch/config/'
+
 sys.path.insert(0,bacch_sourcedir)
 
 # Sphinx Extensions
@@ -15,8 +16,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'bacchbuilder',
-    'bacchbuilder-new']
+    #'bacchbuilder',
+    'bacch_sphinx']
 
 # Templates
 templates_path = ['_templates']
