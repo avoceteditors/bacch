@@ -20,5 +20,20 @@ There is no development schedule or fixed release cycle.  It'll be done when it'
 
 ## Release Notes
 
-None.  Nothing is yet stable.
+### Version 0.x
+
+Initial development releases.
+
+#### Version 0.3
+
+First version to successfully run build system top to bottom on a project written in reStructuredText.  Provides configuration options for minor adjustments in formatting.
+
+
+#### Version 0.2
+
+Developed the `bacchbuilder` Sphinx extension.  When Sphinx is called by itself, able to create a properly formatted PDF document of a novel for trade paperback release. 
+
+#### Version 0.1
+
+First prototype `bacch` system.  `bacch` able to successfully parse XML source code to produce a single HTML document.
 
