@@ -93,7 +93,7 @@ class BacchBuilder(Builder):
         # Move New File from build dir 
         title = self.config.bacch_title.lower().replace(' ','') + '.pdf'
         newfile = self.srcdir + '/../' + title
-        basepdf = self.config.master_doc + '.pdf'
+        basepdf = self.outdir + '/' + self.config.master_doc + '.pdf'
     
         os.rename(basepdf, newfile)
 
