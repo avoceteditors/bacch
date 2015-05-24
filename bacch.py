@@ -1,318 +1,763 @@
 #! /usr/bin/env python3
 
-##################################################################
-# bacch.py - Provides a series of utilities to assist writers    #
-#  working in unix-like environments, such as Linux and FreeBSD. #
-#  These utilities include a project builder for presentation, a #
-#  compiler of project statistics and progress, and similar      #
-#  development tools for technical writers and novelists.        #
-#                                                                #
-# Author: Kenneth P. J. Dyer                                     #
-#                                                                #
-# Version: 0.3                                                   #
-#                                                                #
-# Date: April 2015                                               #
-#                                                                #
-##################################################################
-
-
-###################################
+#####################################
 # Module Imports
-import sys, argparse, os, os.path, configparser, shutil, subprocess
-import lxml, lxml.etree, lxml.ElementInclude
-import sphinx
+import codecs, os.path,re, subprocess
 
-class Project():
+from sphinx.builders import Builder
+from sphinx.util.osutil import ensuredir, os_path
+from sphinx.util.console import bold, darkgreen
+from sphinx.util.nodes import inline_all_toctrees
+from sphinx.util.compat import Directive
 
-    
-    def __init__(self, args):
+from docutils import nodes, writers
+from docutils.io import StringOutput
+###################################################
+# Bacch Full Builder
+class Bacch_Full(Builder):
+    name = "bacchfull"
+    format = "latex"
+    extension = ".tex"
+    writer = None
 
-        # Build Masthead
-        self.program = "bacch"
-        self.version = "0.3"
-        self.masthead = "%s version %s" % (self.program, self.version)
-
-        self.ignorelist_start = ['#']
-        self.ignorelist_end = ['#', '~']
-
-        # Initialize Variables
-        self.path = ''
-        self.sourcedir = ''
-        self.outputdir = ''
-        self.meta = {}
-        
-        # Load Arguments into Class
-        self.args = args
-
-        # Initialize Working Directory
-        self.init_dir()
-
-        # Initialize Builders
-        self.init_build()
-        
-    # Initialize Working Directory
-    def init_dir(self):
-        if self.args.verbose:
-            print(self.masthead)
-
-        # Initialize Path
-        path = self.args.path
-        try:
-            if os.path.isdir(path):
-                self.path = os.path.realpath(path)
-        except:
-            self.path = os.path.realpath('.')
-        
-        # Add a Slash to Path If None
-        self.path = self.fix_dirpath(self.path)
-
-        # Verbose Notification
-        if self.args.verbose:
-            print("\t Defining working directoy as %s." % self.path)
-
-        # Find Configuration File
-        configfile = self.args.config
-        default = 'project.conf'
-        if configfile != None:
-            if os.path.exists(configfile) and os.path.isfile(configfile):
-                configfile = default
-        else:
-            configfile = default
-                
-        # Load Configuration File
-        self.config = configparser.ConfigParser()
-        self.config.read(configfile)
-
-        # Verbose Notification
-        if self.args.verbose:
-            print("\t Defining configuration file as %s." % configfile)
-        
-        # Define Project Directories
-        self.sourcedir = self.parse_config("sourcedir",
-                                           self.args.source, 'source', 0)
-                                           
-        self.outputdir = self.parse_config("outputdir",
-                                           self.args.output, "tmp", 0)
-
-
-        self.progdir = self.parse_config("progdir",
-                                           self.args.progdir,
-                                           "/usr/share/bacch/config/",0)
-        self.progdir = self.fix_dirpath(os.path.realpath(self.progdir))
-
-        # Define Reader and Writer Formats
-        self.reader = self.parse_config("read_format",
-                                        self.args.read_format,"check",2)
-        if self.reader == 'rest':
-            self.reader = 'rst'
-        elif self.reader == 'docbook':
-            self.reader = 'xml'
-        elif self.reader == "check":
-            self.reader = self.determine_reader()
-
-        self.writer = self.parse_config("write_format",
-                                        self.args.write_format, "book",2)
-
-        # Define Metadata Variables
-        self.load_metadata(0,"bacch_title", "title", "Untitled")
-        self.load_metadata(0,"bacch_subtitle","subtitle")
-        self.load_metadata(0,"bacch_running_title","running_title", 
-                           self.meta['bacch_title'])
-        self.load_metadata(0,"bacch_secondline_title","secondline_title")
-
-        self.load_metadata(0,"bacch_author", "author", "Unknown Author")
-        self.load_metadata(0,"bacch_surname", "surname", 
-                           self.meta["bacch_author"])
-
-        # Define Typesetting Variables Here
-
-
-    def parse_config(self, var, arg, default, typ):
-        """
-        bacch method - reads command line arguments,
-        project configuration file and defaults to
-        determine which variable is valid and takes
-        precedent.  If none are valid, exits with error.
-
-        typ argument takes int value to determine how
-        the method reads the variable.
-
-        0 - method parses variable as directory.
-        1 - method parses variable as file.
-        2 - method returns highest precedent value.
-
-        """
-
-        try:
-            configvar = self.config["Project"][var]
-        except:
-            configvar = None
-
-        precedent = [default, configvar, arg]
-        order = None
-        for i in precedent:
-            if i != None:
-                check = self.check_config(i,typ)
-                if check != None:
-                    order = check
-
-        if order != None:
-            if self.args.verbose:
-                if order != default:
-                    print("\t Redefining %s variable as %s." % (order, default))
-                else:
-                    print("\t Defining %s variable." % order)
-
-            return order
-        else:
-            sys.exit("Error at line 121 on %s, fix." % default)
-
-
-    # Check Configs
-    def check_config(self, check, typ):
-        if typ == 2:
-            return check
-        else:
-            if os.path.exists(check):
-                if typ == 0:
-                    if os.path.isdir(check):
-                        return self.fix_dirpath(check)
-                if typ == 1:
-                    if os.path.isfile(check):
-                        return check
-        return None
-
-    def fix_dirpath(self,path):
-        if path[-1:] == "/":
-            return path 
-        else:
-            return path + '/'
-
-    def determine_reader(self):
-        sourcefiles = self.clear_ignores(os.listdir(self.sourcedir))
-        rst = xml = 0
-        for i in sourcefiles:
-            ext = i[-3:]
-            if ext == 'rst':
-                rst = rst + 1
-            elif ext == 'xml':
-                xml = xml + 1
-
-        if rst > xml:
-            return 'rst'
-        elif rst < xml:
-            return 'xml'
-
-
-    def clear_ignores(self,sourcelist):
-        returnlist = []
-        for i in sourcelist:
-            if i[-1:] not in self.ignorelist_end:
-                if i[0] not in self.ignorelist_start:
-                    returnlist.append(i)
-        return returnlist
-
-    # Define Metadata Variables
-    def load_metadata(self, typ, name, var, default = None):
-        if typ == 0:
-            unit = "Metadata"
-        elif typ == 1:
-            unit = "Typesetting"
-        else:
-            sys.exit("Invalid config, line 213")
-
-        try:
-            variable = self.config[unit][var]
-        except:
-            variable = default
-        
-        if variable != None:
-            self.meta[name] = variable
-
-
-    # Initialize Builders
-    def init_build(self):
-        if self.args.verbose:
-            print("Initializing %s Builder..." % self.reader)
-
-        if self.reader == "rst":
-            self.builder_rst()
-        elif self.reader == "xml":
-            self.builder_xml()
-
-            
-    # Launch reST Builder
-    def builder_rst(self):
-        
-        # Fix Confpy
-        self.fix_confpy()
-
-        # Set Metadata Variables
-        metadata = ['']
-        for key in self.meta:
-            metadata = metadata + ['-D', '%s=%s' % (key, self.meta[key])]
-
-        # Configure Write Format
-        metadata = metadata + ['-D', 'bacch_build_type=%s' % self.writer]
-            
-        parameters = ['-b', self.program, self.sourcedir, self.outputdir]
-
-        arguments = metadata + parameters
-        print(arguments)
-        # Run Sphinx
-        sphinx.main(arguments)
-    
-    def fix_confpy(self):
-
-        # Check for conf.py
-        localconf = self.sourcedir + 'conf.py'
-        repoconf = self.progdir + 'conf.py'
-
-        if not os.path.exists(repoconf):
-            sys.exit("Error: No repo conf.py.")
-        elif not os.path.exists(localconf):
-            if self.args.verbose:
-                print("\tCreating symlink from %s to %s." %
-                      (repoconf, localconf))
-            os.symlink(repoconf,localconf)
-        else:
-            reallocal = os.path.realpath(localconf)
-            realrepo = os.path.realpath(repoconf)
-
-            if reallocal != realrepo:
-                if self.args.verbose:
-                    print("\t Found existing conf.py in %s. "
-                          "Moving conf.py to .conf.py.old." % self.sourcedir)
-                os.rename(localconf, self.sourcedir + 'old-conf.py')
-                os.symlink(repoconf,localconf)
-
-
-    # Launch XML Builder
-    def builder_xml(self):
+    def init(self):
         pass
+
+    def get_outdated_docs(self):
+        return 'all documents'
+
+    def prepare_writing(self,docnames):
+        self.writer = BacchFullWriter(self.config)
+
+    def get_relative_uri(self,fron_,to,typ=None):
+        return self.get_target_uri(to,typ)
+
+    def get_target_uri(self,docname,typ):
+        return "%" + docname
+
+    def write(self, *ignored):
+        docnames = self.env.all_docs
+
+        self.info(bold("Preparing documents..."),nonl=True)
+        self.prepare_writing(docnames)
+        self.info("Done")
+
+        self.info(bold("Assembling single document..."),nonl=True)
+        doctree = self.assemble_doctree()
+        self.info("Done")
+        self.info()
+        self.info(bold("Writing..."),nonl=True)
+        self.write_doc(self.config.master_doc,doctree)
+        self.outfile = os.path.join(
+            self.outdir,os_path(
+                self.config.master_doc) + self.extension)
+        self.docfile = os.path.join(
+            self.outdir,os_path(self.config.master_doc) + '.pdf')
+
+        ensuredir(os.path.dirname(self.outfile))
+        self.write_file(self.outfile,self.writer.output)
+        self.info("Done")
+
+    def assemble_doctree(self):
+        master = self.config.master_doc
+        tree = self.env.get_doctree(master)
+        tree = inline_all_toctrees(self,set(),master,tree,darkgreen)
+        tree['docname'] = master
         
-        
-# Launch Program
-if __name__ == '__main__':
+        return tree
 
-    # Parse Arguments
-    parser = argparse.ArgumentParser()
+    def write_doc(self,docname,doctree):
+        destination = StringOutput(encoding = 'utf-8')
+        output = self.writer.write(doctree,destination)
 
-    # Define Base Arguments
-    parser.add_argument('-v', '--verbose', action='store_true')
+    def write_file(self,outfile,content):
+        try:
+            f = codecs.open(outfile,'w','utf-8')
+            try:
+                f.write(content)
+            finally:
+                f.close()
+        except (IOError,OSError) as err:
+            self.warn("Error writing file %s: %s" % (outfile, err))
 
-    # Define Configuration Arugments
-    parser.add_argument('-p', '--path')
-    parser.add_argument('-c', '--config')
-    parser.add_argument('-s','--source')
-    parser.add_argument('-o','--output')
-    parser.add_argument('--progdir')
+    def finish(self):
 
-    # Defines Read and Write Formats
-    parser.add_argument('-f','--read_format',
-                        choices=['rst','rest','xml','docbook'])
-    parser.add_argument('-t','--write_format',
-                        choices=['book','manuscript'])
+        # Convert LaTeX File into PDF
+        command = ['pdflatex',
+                   '-output-directory',
+                   self.outdir,
+                   self.outfile]
+        subprocess.call(command)
+
+        # Move New File from build dir 
+        title = self.config.bacch_title.lower().replace(' ','') + '.pdf'
+        newfile = self.srcdir + '/../' + title
+        os.rename(self.outfile, newfile)
+
+# Writer 
+class BacchFullWriter(writers.Writer):
     
-    arguments = parser.parse_args()
-    thisProject = Project(arguments)
+    def __init__(self,config):
+        writers.Writer.__init__(self)
+        self.config = config
+
+    def translate(self):
+        translator = BacchFullTranslator(self.document,self.config)
+        self.document.walkabout(translator)
+        self.output = translator.astext()
+
+# Translator
+class BacchFullTranslator(nodes.NodeVisitor):
+
+    body = []
+
+    def __init__(self, document, config):
+        nodes.NodeVisitor.__init__(self,document)
+        self.current_chapter = ''
+        self.current_command = ''
+        self.current_level = 0
+        self.chapheader = {}
+        self.config = config
+        self.build = self.config.bacch_build_type
+        self.assign_node_handlers()
+
+    def astext(self):
+        return ''.join(self.body)
+
+
+    
+    def assign_node_handlers(self):
+        nodenames = [
+            ('abbreviation', 'skip'),
+            ('acks', 'skip'),
+            ('admonition', 'skip'),
+            ('attribution', 'skip'),
+            ('bullet_list', 'skip'),
+            ('caption', 'skip'),
+            ('centered', 'skip'),
+            ('citation', 'skip'),
+            ('citation_reference', 'skip'),
+            ('classifier', 'skip'),
+            ('collected_footnote', 'skip'),
+            ('colspec', 'skip'),
+            ('comment', 'skip'),
+            ('compact_paragraph', 'skip'),
+            ('compound', 'pass'),
+            ('container', 'skip'),
+            ('decoration', 'skip'),
+            ('definition', 'skip'),
+            ('definition_list', 'skip'),
+            ('definition_list_item', 'skip'),
+            ('desc', 'skip'),
+            ('desc_addname', 'skip'),
+            ('desc_annotation', 'skip'),
+            ('desc_content', 'skip'),
+            ('desc_name', 'skip'),
+            ('desc_optional', 'skip'),
+            ('desc_parameter', 'skip'),
+            ('desc_parameterlist', 'skip'),
+            ('desc_returns', 'skip'),
+            ('desc_signature', 'skip'),
+            ('desc_type', 'skip'),
+            ('description', 'skip'),
+            ('docinfo', 'skip'),
+            ('download_reference', 'skip'),
+            ('entry', 'skip'),
+            ('enumerated_list', 'skip'),
+            ('field', 'skip'),
+            ('field_list', 'skip'),
+            ('figure', 'skip'),
+            ('footer', 'skip'),
+            ('footnote', 'skip'),
+            ('footnote_reference', 'skip'),
+            ('generated', 'skip'),
+            ('glossary', 'skip'),
+            ('header', 'skip'),
+            ('highlightlang', 'skip'),
+            ('hlist', 'skip'),
+            ('hlistcol', 'skip'),
+            ('image', 'skip'),
+            ('index', 'skip'),
+            ('inline', 'skip'),
+            ('label', 'skip'),
+            ('legend', 'skip'),
+            ('list_item', 'skip'),
+            ('literal', 'skip'),
+            ('literal_block', 'skip'),
+            ('literal_emphasis', 'skip'),
+            ('meta', 'skip'),
+            ('option', 'skip'),
+            ('option_argument', 'skip'),
+            ('option_group', 'skip'),
+            ('option_list', 'skip'),
+            ('option_list_item', 'skip'),
+            ('option_string', 'skip'),
+            ('pending_xref', 'skip'),
+            ('problematic', 'skip'),
+            ('production', 'skip'),
+            ('productionlist', 'skip'),
+            ('raw', 'skip'),
+            ('refcount', 'skip'),
+            ('reference', 'skip'),
+            ('row', 'skip'),
+            ('rubric', 'skip'),
+            ('seealso', 'skip'),
+            ('start_of_file', 'pass'),
+            ('subscript', 'skip'),
+            ('substitution_definition', 'skip'),
+            ('substitution_reference', 'skip'),
+            ('subtitle', 'skip'),
+            ('superscript', 'skip'),
+            ('suppress_numbering', 'pass'),
+            ('system_message', 'skip'),
+            ('table', 'skip'),
+            ('tabular_col_spec', 'skip'),
+            ('target', 'skip'),
+            ('tbody', 'skip'),
+            ('term', 'skip'),
+            ('tgroup', 'skip'),
+            ('thead', 'skip'),
+            ('title', 'skip'),
+            ('title_reference', 'skip'),
+            ('topic', 'skip'),
+            ('transition', 'skip'),
+            ('versionmodified', 'skip')
+        ]
+        for name in nodenames:
+            if name[1] == 'skip':
+                setattr(self, 'visit_' + name[0], skip_me)
+            elif name[1] == 'pass':
+                setattr(self, 'visit_' + name[0], pass_me)
+                setattr(self,'depart_' + name[0], pass_me)
+            else:
+                raise ValueError("When assigning node handlers, you must set"
+                                 "%s to either 'skip' or 'pass'." % name[0])
+
+    def visit_Text(self,node):
+        reserved_latex_chars = '[{}\\\^&\%\$#~_]'
+        text = re.sub(reserved_latex_chars,self.escaped_chars,node.astext())
+        self.body.append(text)
+
+
+    def escaped_chars(self,match):
+        if match.group(0) == '~':
+            return '$\\sim$'
+        elif match.group(0) == '\\':
+            return '$\\backslash$'
+        elif match.group(0) == '^':
+            return '\\^{}'
+        else:
+            return '\\' + match.group(0)
+    
+    def depart_Text(self,node):
+        pass
+
+
+    def visit_paragraph(self,node):
+        self.body.append('\n')
+
+    def depart_paragraph(self,node):
+        self.body.append('\n')
+
+
+    def visit_section(self,node):
+        parent_start = ''
+        gramps_start = ''
+        if isinstance(node.parent,nodes.document):
+            # Discern Chapters from Index
+            parent_start = str(node.parent)[0:26]
+            if 'index' not in parent_start:
+                gramps_start = str(node.parent.parent)[0:26]
+                if 'index' not in gramps_start:
+                    self.generate_secheader(node,'chapter')
+                else:
+                    self.generate_secheader(node,'part')
+        elif isinstance(node.parent.parent,nodes.document):
+            parent_start = str(node.parent.parent)[0:26]
+            if 'index' in parent_start:
+                self.generate_secheader(node,"part")
+            else:
+                self.generate_secheader(node,"section")
+        elif isinstance( node.parent.parent.parent, nodes.document):
+            parent_start = str(node.parent.parent.parent)[0:26]
+            if 'index' in parent_start:
+                self.generate_secheader(node,"chapter")
+            else:
+                self.generate_secheader(node,"subsection")
+
+    def generate_secheader(self,node,headertype):
+
+        title = node.next_node()
+        header = ""
+
+
+        if isinstance(title,nodes.title):
+            title = title.astext()
+
+            if headertype == "part":
+                self.current_level = 1
+                header = (
+                    "\\part%s{%s}\n"
+                    "\n") % (
+                        self.config.bacch_section_numbering,
+                        title)
+
+            elif headertype == "chapter":
+                self.current_level = 2
+                self.current_command = title.replace(" ","")
+                self.current_chapter = title
+                header = (
+                    "\\newpage"
+                    "\\chapter%s{%s}\n"
+                    "\\phantomsection"
+                    "\\addcontentsline{toc}{chapter}"
+                    "{\\protect \\normalsize {%s}}"
+                    "\n" ) % ( self.config.bacch_section_numbering,
+                               title, title)
+                if self.config.bacch_chaphead == "none":
+                    pass
+                elif self.config.bacch_chaphead == "block":
+                    block = (
+                        "\\singlespace\n"
+                        "\\textbf{"
+                        "\\scriptsize\\%s}"
+                        "\\vspace{2em}\n"
+                        "\n \\noindent") % (self.current_command)
+                    header = header + block
+                    self.chapheader[self.current_command] = [title]
+
+                elif self.config.bacch_chaphead == "title-block":
+
+                    heading = ("\\begin{center}\n"
+                               "\\vspace{1em}"
+                               "\\uppercase{"
+                               "\\textls[400]{\\bfseries{%s}}}"
+                               "\\vspace{2em}\n"
+                               "\\end{center}"
+                               "\n") % title
+                    block = (
+                        "\\singlespace\n"
+                        "\\textbf{"
+                        "\\scriptsize\\%s}"
+                        "\\vspace{2em}\n"
+                        "\n \\noindent") % (self.current_command)
+                    header = header + heading + block
+                    self.chapheader[self.current_command] = []
+
+            elif headertype == 'section':
+                self.current_level = 3
+                header = "\\section%s{%s}" % (
+                    self.config.bacch_section_numbering,
+                    title)
+                if self.config.bacch_chaphead == 'none':
+                    pass
+                elif self.config.bacch_chaphead == 'block' or self.config.bacch_chaphead == "title-block":
+                    self.chapheader[self.current_command].append(title)
+                    
+            elif headertype == 'subsection':
+                self.current_level = 4
+                header = "\\subsection%s{%s}" % (
+                    self.config.bacch_section_numbering,
+                    title)
+                if self.config.bacch_chaphead == 'none':
+                    pass
+                elif self.config.bacch_chaphead == 'block' or self.config.bacch_chaphead == "title-block":
+                    self.chapheader[self.current_command].append(title)
+
+                self.body.append(header)
+        else:
+            return SyntaxError(
+                "This %s does not have a title." % header)
+
+        self.body.append(header)
+        
+
+    def depart_section(self,node):
+        pass
+
+
+    def visit_document(self,node):
+        start = []
+        start.append("\\begin{document}\n")
+        
+        titleformat = self.config.bacch_titlepage_format
+
+        if titleformat == 'novel-0.1':
+            titlepage =("\\begin{titlepage}\n"
+                        "\\begin{center}\n\n"
+                        "\\showhrule\\par"
+                        "\\vspace{5em}"
+                        "\\bfseries \\Huge"
+                        "\\textrm{"
+                        "\\showuptitle}\\par"
+                        "\n\n"
+                        "\\vspace{8em}\\large\n"
+                        "\\textrm{\\emph{\\showsubtitle}}\n\n"
+                        "\\vspace{5em}\\Large\n"
+                        "\\showauthor\n"
+                        "\\vspace{1.5em}\n"
+                        "\\showhrule\n\n"
+                        "\\end{center}\n"
+                        "\\end{titlepage}\n")
+            start.append(titlepage)
+
+        start.append("\n"
+                     "\\setcounter{tocdepth}{5}\n")
+        if self.config.bacch_show_toc:
+            start.append('\\tableofcontents \n')
+
+        for i in start:
+            self.body.append(i)
+
+
+    def depart_document(self,node):
+        self.header = BacchFullHeader(self.config,self.chapheader)
+        self.body.insert(0,self.header.astext())
+        self.body.append('\n \\end{document}\n')
+
+    def visit_strong(self,node):
+        self.body.append('\\textbf{')
+
+    def depart_strong(self,node):
+        self.body.append('}')
+
+    def visit_emphasis(self,node):
+        self.body.append('\\emph{')
+
+    def depart_emphasis(self,node):
+        self.body.append('}')
+
+    def visit_line_block(self,node):
+        self.body.append("\n\\begin{singlespace}"
+                         "\\begin{verse}")
+
+    def depart_line_block(self,node):
+        self.body.append("\n\\end{verse}"
+                         "\\end{singlespace}\n")
+
+    def visit_line(self,node):
+        self.body.append('\n')
+
+    def depart_line(self,node):
+        next_line = node.next_node(condition=nodes.line,siblings=1)
+        if self.line_is_blank(node) and self.line_is_blank(next_line):
+            self.body.append('\\\\')
+
+    def line_is_blank(self,node):
+        if not isinstance(node,nodes.line):
+            return False
+        else:
+            if node.astext().strip() != '':
+                return True
+            else:
+                return False
+
+    def visit_block_quote(self,node):
+        self.body.append('\n\\begin{quotation}')
+
+    def depart_block_quote(self,node):
+        self.body.append('\n\\begin{quotation}')
+
+    def visit_synopsis(self,node):
+        self.body.append('\n\\begin{synopsis}')
+
+    def depart_synopsis(self,node):
+        self.body.append('\n\\end{synopsis}\n')
+
+
+# Header Generator
+class BacchFullHeader(object):
+    header = []
+     
+    def __init__(self,config,chapheader):
+        self.config = config
+        self.chapheader = chapheader
+
+    def astext(self):
+        self.set_documentclass()
+        self.set_packages()
+        self.set_commands()
+        return '\n'.join(self.header)
+
+
+
+    def set_documentclass(self):
+
+        options = ['openright','pdftex']
+
+        # Check If Nonsubmission
+        if self.config.bacch_nonsubmission:
+            options.append('nonsubmission')
+            if self.config.bacch_notitle:
+                options.append('notitle')
+
+        # Check Quotation Type
+        quote_type = self.config.bacch_quote_type
+        if quote_type:
+            options.append(quote_type)
+
+        config_font = self.config.bacch_font_size
+        if config_font in ['10pt', '12pt']:
+            options.append(config_font)
+            
+        options = ','.join(options)
+        
+        self.header.append('\\documentclass[%s]{%s}' % (options, 'book'))
+
+
+    # Configure LaTeX Packages
+    def set_packages(self):
+
+        packages = { "hyperref" : [''],
+                     "titlesec" : ['explicit', 'noindentafter'],
+                     "titletoc" : [''],
+                     "fancyhdr" : [''],
+                     "setspace" : [''] }
+
+        # Deifine Paper Sizes
+        build_type = self.config.bacch_build_type
+        if build_type == 'manuscript':
+            packages["geometry"] = ['letterpaper']
+        elif build_type == 'book':
+            packages["geometry"] = ['b5paper']
+
+        packages["microtype"] = ["tracking"]
+
+        for key in packages:
+            if packages[key] == ['']:
+                self.header.append('\\usepackage{%s}\n' % key)
+            else:
+                package_options = ','.join(packages[key])
+                self.header.append('\\usepackage[%s]{%s}'
+                                   '\n' % (package_options, key))
+
+    # Set up LaTeX Commands
+    def set_commands(self):
+        commands = []
+
+        #######################
+        # Define Metadata
+
+        commands.append(
+            self.def_command(0,'showauthor',
+                             self.config.bacch_author))
+        commands.append(
+            self.def_command(0,'showsurname',
+                             self.config.bacch_surname))
+        commands.append(
+            self.def_command(0,'showtitle',
+                             self.config.bacch_title))
+        commands.append(
+            self.def_command(0,'showuptitle',
+                             self.config.bacch_title.upper()))
+        commands.append(
+            self.def_command(0,'showrunningtitle',
+                             self.config.bacch_running_title))
+        commands.append(
+            self.def_command(0,'showscondtitle',
+                             self.config.bacch_title_secondline))
+        commands.append(
+            self.def_command(0,'showsubtitle',
+                             self.config.bacch_subtitle))
+
+        commands.append('\\frenchspacing')
+
+
+        
+        # Format Section Headers
+        commands.append("\\titleclass{\\part}{page}\n"
+                        "\\titleformat{\\part}\n"
+                        "{\\Huge}{\\thepart}{}\n"
+                        "{\\centering \\uppercase{"
+                        "\\textrm{\\textbf{#1}}}}\n")
+        
+        if len(self.chapheader) > 0:
+               for key in self.chapheader:
+                   call = "\\%s" % key
+                   separator = self.config.bacch_chapblock_separator
+                   block = separator.join(self.chapheader[key]) + "."
+
+                   commands.append(
+                       self.def_command(0, key,
+                                        block))
+
+        commands.append("\\titleclass{\\chapter}{straight}\n"
+                        "\\titleformat{\\chapter}\n"
+                        "{}{\\thechapter}{}{}\n"
+                        "\\titlespacing{\\chapter}\n"
+                        "{\\parindent}{\\baselineskip}{-2em}"
+                        "\n")
+
+        
+        commands.append("\\titleclass{\\section}{straight}\n"
+                    "\\titleformat{\\section}\n"
+                    "{}{\\thesection}{}{\\centering \\showsecbreak} \n"
+                    "\\titlespacing{\\section}\n"
+                    "{\\parindent}{1em}{1em}"
+                    "\n")
+        commands.append("\\titleclass{\\subsection}{straight}\n"
+                    "\\titleformat{\\subsection}\n"
+                    "{}{\\thesubsection}{}{} \n"
+                    "\\titlespacing{\\subsection}\n"
+                    "{\\parindent}{\\baselineskip}{-1em}"
+                    "\n")
+
+               
+        # Define Breaks
+        secbreak_type = self.config.bacch_secbreak
+        secbreak = ''
+        if secbreak_type == 'short_line':
+            secbreak = '\\rule{5em}{0.25mm}'
+        commands.append(
+            self.def_command(0, 'showsecbreak',
+                             secbreak))
+
+        commands.append(
+            self.def_command(0, 'showhrule',
+                             '\\rule{\\linewidth}{0.5mm}\n'))
+
+                             
+               
+
+        ########################
+        # Define Page Style
+        commands.append("\\pagestyle{fancy}\n")
+
+        headfoot_size = '\\%s' % self.config.bacch_headfoot_size
+        headfoot_space = '\\vspace{%sem}' % self.config.bacch_headfoot_space
+        headfoot_divider = self.config.bacch_headfoot_divider
+        
+        header_type = self.config.bacch_header_type
+        if header_type == 'surname-title':
+            commands.append("\\fancyhead[LE]{"
+                            "%s \\showsurname %s"
+                            "}" % (headfoot_size,headfoot_space))
+            commands.append("\\fancyhead[RO]{"
+                            "%s \\showrunningtitle %s"
+                            "}" % (headfoot_size, headfoot_space))
+
+        elif header_type == 'title-surname':
+            commands.append("\\fancyhead[RO]{"
+                            "%s \\showsurname %s"
+                            "}" % (headfoot_size,headfoot_space))
+            commands.append("\\fancyhead[LE]{"
+                            "%s \\showrunningtitle %s"
+                            "}" % (headfoot_size, headfoot_space))
+
+        elif header_type == 'title-and-surname':
+            commands.append("\\fancyhead[RO]{"
+                            "%s \\showrunning_title %s \\showsurname %s"
+                            "}" % (headfoot_size, headfoot_divider,
+                                   headfoot_space))
+            commands.append("\\fancyhead[LE]{"
+                            "%s \\showsurname %s \\showrunning_title %s"
+                            "}" % (headfoot_size, headfoot_divider,
+                                   headfoot_space))
+
+        elif header_type == 'surname-and-title':
+            commands.append("\\fancyhead[LE]{"
+                            "%s \\showrunning_title %s \\showsurname %s"
+                            "}" % (headfoot_size, header_divider, headfoot_space))
+            commands.append("\\fancyhead[RO]{"
+                            "%s \\showsurname %s \\showrunning_title %s"
+                            "}" % (headfoot_size, headfoot_divider,
+                                   headfoot_space))
+        else:
+            commands.append("\\fancyhead[RO,LE]{"
+                            "%s" % (headfoot_space))
+        # Define Footer
+        footer_type = self.config.bacch_header_type
+        if footer_type == 'pagenumber':
+            commands.append('\\fancyfoot[RO,LE]{'
+                            '%s \\thepage %s' % (headfoot_size, headfoot_space))
+        
+
+        for command in commands:
+            self.header.append(command)
+        
+            
+    # Define Command
+    def def_command(self, typ, variable, values):
+
+        # Define New Commands
+        if typ == 0:
+            return "\\newcommand{\\%s}{%s}\n" % (variable, values)
+        # Define Renew Commands
+        elif typ == 1:
+            return "\\renewcommand{\\%s}{%s}\n" % (variable,value)
+
+
+            
+
+
+
+########################################
+# Bacch Chapter Builder
+class Bacch_Chapter(Builder):
+    name = "bacchchap"
+    format = "latex"
+    extension = ".tex"
+    writer = None
+
+######################################
+# JSON Builder
+class Bacch_JSON(Builder):
+    name = "bacchjson"
+    format = "json"
+    extension = ".json"
+    writer = None
+
+
+#######################################
+# Register Docutils Node Classes
+def add_nodes(app):
+    pass
+
+
+def skip_me(node):
+    raise nodes.SkipNode
+
+def pass_me(node):
+    pass
+
+########################################
+# Module Setup
+def setup(app):
+    app.add_builder(Bacch_Full)
+    app.add_builder(Bacch_Chapter)
+
+    # Init custom nodes, roles and directives
+    add_nodes(app)
+
+    # Define Project Variables
+    app.add_config_value('bacch_build_type',None,'')
+
+    # Define Typesetting Variables
+    app.add_config_value('bacch_section_numbering','*','')
+    app.add_config_value('bacch_chaphead', 'title-block', '')
+    app.add_config_value('bacch_titlepage_format','novel-0.1','')
+    app.add_config_value('bacch_show_toc', True,'')
+
+    app.add_config_value('bacch_nonsubmission', None,'')
+    app.add_config_value('bacch_quote_type','smart','')
+    app.add_config_value('bacch_notitle',False,'')
+    app.add_config_value('bacch_secbreak','short_line','')
+
+    app.add_config_value('bacch_headfoot_size','tiny','')
+    app.add_config_value('bacch_headfoot_space','2','')
+    app.add_config_value('bacch_headfoot_divider','|','')
+    app.add_config_value('bacch_header_type','surname-title','')
+    app.add_config_value('bacch_footer_type','pagenumber','')
+    app.add_config_value('bacch_chapblock_separator',' -- ','')
+    app.add_config_value('bacch_frenchspacing',True,'')
+    app.add_config_value('bacch_font_size','10pt','')
+    
+    # Define Metadata Variables
+    app.add_config_value('bacch_author',None,'')
+    app.add_config_value('bacch_surname',None,'')
+    app.add_config_value('bacch_title',None,'')
+    app.add_config_value('bacch_running_title',None,'')
+    app.add_config_value('bacch_subtitle',None,'')
+    app.add_config_value('bacch_title_secondline',None,'')
+                         
+
