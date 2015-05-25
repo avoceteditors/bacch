@@ -13,6 +13,8 @@ from sphinx.util.compat import Directive
 from docutils import nodes, writers
 from docutils.io import StringOutput
 
+import tex
+
 import bacchwriter
 
 #######################################
@@ -94,8 +96,14 @@ class BacchFullBuilder(Builder):
             self.warn("Error writing file %s: %s" % (outfile,err))
 
     def finish(self):
-        pass
+        path = os.path.realpath('.') + '/'
+        target = path + self.config.bacch_title.replace(' ','') + '.pdf'
+        subprocess.call(['pdflatex','--output-directory=%s' % self.outdir, self.outfile])
+        source = self.outdir + '/index.pdf'
+        os.rename(source,target)
+                        
 
+        
 ########################################
 # Chapter Builder
 class BacchChapBuilder(Builder):

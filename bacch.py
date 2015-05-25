@@ -28,10 +28,14 @@ def setup(app):
 
     # Define Project Variables
     app.add_config_value('bacch_buildtype','TPB','')
-
+    app.add_config_value('bacch_show_todo',False,'')
+    
     # Define Typesetting Variables
     app.add_config_value('bacch_chapter_block',None,'')
+    app.add_config_value('bacch_chapblock_separator','--','')
 
+    app.add_config_value('bacch_section_number', False,'')
+    
     app.add_config_value('bacch_show_toc',False,'')
     app.add_config_value('bacch_secbreak','---','')
 
@@ -53,4 +57,6 @@ def setup(app):
     app.add_config_value('bacch_title_runner','Untitled','')
 
 
+
+    
 

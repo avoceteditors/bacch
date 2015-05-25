@@ -34,9 +34,8 @@ class BacchTranslator(nodes.NodeVisitor):
         self.config = config
         self.outclass = outclass
 
-
         self.chapheader = {}
-        self.chap_block_command = ''
+        self.current_chapter = ''
         self.section_level = 0
         self.header = []
 
@@ -143,7 +142,8 @@ class BacchTranslator(nodes.NodeVisitor):
             ('title_reference', 'skip'),
             ('topic', 'skip'),
             ('transition', 'skip'),
-            ('versionmodified', 'skip')
+            ('versionmodified', 'skip'),
+            ('todo','pass')
         ]
 
         for name in nodenames:
@@ -200,15 +200,24 @@ class BacchTranslator(nodes.NodeVisitor):
             else:
                 self.full_section_closer(node)
 
+                
 
     def full_section_opener(self, node):
         # Initialize Checks
+        docname = node.get('docname')
+        if docname == None:
+            docname = 'index'
+
         parent_start = ''
 
-        # Identify First Level Elements
-        if isinstance(node.parent, nodes.document):
+        if 'part' in docname:
+            self.section_level = 1
+            self.generate_secheader(node, "part")
+                
+        elif isinstance(node.parent, nodes.document):
             # Discern Chapters and Parts from Index
-            parent_start = str(node.parent)[0:26]
+            parent_start = str(node.parent)[0:30]
+
             if 'index' not in parent_start:
                 self.section_level = 2
                 self.generate_secheader(node, "chapter")
@@ -239,6 +248,7 @@ class BacchTranslator(nodes.NodeVisitor):
                 self.generate_secheader(node, "subsection")
 
 
+                
     def full_section_closer(self, node):
         pass
 
@@ -262,18 +272,22 @@ class BacchTranslator(nodes.NodeVisitor):
 
     def generate_parthead(self, title):
         header = ''
+
         header = '\\part*{%s}\n\n' % title
         self.body.append(header)
 
     def generate_chaphead(self, title):
         header = block = topblock = ''
         blocktype = self.config.bacch_chapter_block
-        header = ('\\newpage'
-                  '\\chapter*{%s}\n'
-                  '\\phantomsection'
-                  '\\addcontentsline{toc}{chapter}'
-                  '{\\protect \\normalsize {%s}}'
-                  '\n') % (title, title)
+        command = title.replace(' ','')
+        self.current_chapter = title
+        header = '\\chapter*{%s}\n' % title
+
+        end =('\\phantomsection'
+              '\\addcontentsline{toc}{chapter}'
+              '{\\protect \\normalsize {%s}}'
+              '\n') % title
+        header = '\\newpage\n' + header + end
 
         blocktop = ('\\begin{center}\n'
                     '\\vspace{1em}'
@@ -287,35 +301,35 @@ class BacchTranslator(nodes.NodeVisitor):
                  '\\textbf{'
                  '\\scriptsize\\%s}'
                  '\\vspace{2em}\n'
-                 '\n \\noindent') % self.chap_block_command
+                 '\n \\noindent') % command
 
         if blocktype == 'block':
             header = header + block
-            self.chapheader[self.chap_block_command] = [title]
+            self.chapheader[title] = [title]
         elif blocktype == 'title-block':
             header = header + blocktop + block
-            self.chapheader[self.chap_block_command] = []
+            self.chapheader[title] = []
         elif blocktype == 'titleonly':
             header = header + blocktop
-
         self.body.append(header)
 
 
     def generate_secthead(self, title):
         header = ''
         blocktype = self.config.bacch_chapter_block
-        header = '\\section*{%s}' % title
 
+        header = '\\section*{%s}\n' % title
+        
         if blocktype == 'title-block' or blocktype == 'block':
-            self.chapheader[self.chap_block_command].append(title)
+            self.chapheader[self.current_chapter].append(title)
         self.body.append(header)
 
     def generate_subsecthead(self, title):
         header = ''
         blocktype = self.config.bacch_chapter_block
-        header = '\\subsection*{%s}' % title
+        header = '\\subsection*{%s}\n' % title
         if blocktype == 'title-block' or blocktype == 'block':
-            self.chapheader[self.chap_block_command].append(title)
+            self.chapheader[self.current_chapter].append(title)
         self.body.append(header)
 
 
@@ -393,11 +407,22 @@ class BacchTranslator(nodes.NodeVisitor):
 
     # Parse Block Quote
     def visit_block_quote(self, node):
-        self.body.append('\n\\begin{quotation}')
+        self.body.append('\n\\begin{quotation}\n')
 
     def depart_block_quote(self, node):
         self.body.append('\n\\end{quotation}\n')
 
+    # Parse Todos
+    def visit_note(self, node):
+        header = ('\\begin{framed}'
+                  '\\small\n \\noindent'
+                  '\\textbf{Note: }')
+
+        note = header
+        self.body.append(note)
+    def depart_note(self, node):
+        note = ('\\end{framed}\n')
+        self.body.append(note)
 
 ###################################################
 # Generate LaTeX Header Information
@@ -442,6 +467,7 @@ class BacchHeader(object):
                     'fancyhdr': [''],
                     'titletoc': [''],
                     'setspace': [''],
+                    'framed': [''],
                     'microtype': ['tracking']}
 
         buildtype = self.config.bacch_buildtype
@@ -527,11 +553,13 @@ class BacchHeader(object):
                            '\\textrm{\\textbf{#1}}}}\n')
 
         # Format Chapter Header Blocks
+
         if len(self.chapheader) > 0:
             for key in self.chapheader:
                 separator = self.config.bacch_chapblock_separator
                 block = separator.join(self.chapheader[key]) + '.'
-                self.def_command('new', key, block)
+                print(block)
+                self.def_command('new', key.replace(' ',''), block)
 
         # Format Chapter Header
         self.header.append('\\titleclass{\\chapter}{straight}\n'
