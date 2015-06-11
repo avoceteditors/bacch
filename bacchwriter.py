@@ -38,7 +38,8 @@ class BacchTranslator(nodes.NodeVisitor):
         self.current_chapter = ''
         self.section_level = 0
         self.header = []
-
+        self.open = False
+        
         # Build Calls
         self.assign_node_handlers()
 
@@ -50,7 +51,8 @@ class BacchTranslator(nodes.NodeVisitor):
     def assign_node_handlers(self):
 
         nodenames = [
-            ('abbreviation', 'skip'), ('acks', 'skip'),
+            ('abbreviation', 'skip'),
+            ('acks', 'skip'),
             ('admonition', 'skip'),
             ('attribution', 'skip'),
             ('bullet_list', 'skip'),
@@ -140,10 +142,10 @@ class BacchTranslator(nodes.NodeVisitor):
             ('thead', 'skip'),
             ('title', 'skip'),
             ('title_reference', 'skip'),
+            ('todo','pass'),
             ('topic', 'skip'),
             ('transition', 'skip'),
             ('versionmodified', 'skip'),
-            ('todo','pass')
         ]
 
         for name in nodenames:
@@ -159,7 +161,7 @@ class BacchTranslator(nodes.NodeVisitor):
     ########################################
     # Parse Text
     def visit_Text(self, node):
-        reserved_latex_chars = '[{}\\\^&\%\$#~_]'
+        reserved_latex_chars = '["{}\\\^&\%\$#~_]'
         text = re.sub(reserved_latex_chars, self.escaped_chars, node.astext())
         self.body.append(text)
 
@@ -170,6 +172,13 @@ class BacchTranslator(nodes.NodeVisitor):
             return '$\\backslash$'
         elif match.group(0) == '^':
             return '\\^{}'
+        elif match.group(0) == '"':
+            if self.open == True:
+                self.open = False
+                return "''"
+            else:
+                self.open = True
+                return "``"
         else:
             return '\\' + match.group(0)
 
@@ -272,8 +281,11 @@ class BacchTranslator(nodes.NodeVisitor):
 
     def generate_parthead(self, title):
         header = ''
-
-        header = '\\part*{%s}\n\n' % title
+        header = "\\part*{%s}\n" % title
+        content = ('\\phantomsection\n'
+                   '\\addcontentsline{toc}{chapter}'
+                   '{\\protect \\small %s }\n') % title
+        header = header #+ content
         self.body.append(header)
 
     def generate_chaphead(self, title):
@@ -283,10 +295,10 @@ class BacchTranslator(nodes.NodeVisitor):
         self.current_chapter = title
         header = '\\chapter*{%s}\n' % title
 
-        end =('\\phantomsection'
+        end =('\\phantomsection\n'
               '\\addcontentsline{toc}{chapter}'
-              '{\\protect \\normalsize {%s}}'
-              '\n') % title
+              '{\\protect \\small -- %s}\n'
+              '\n') % (title)
         header = '\\newpage\n' + header + end
 
         blocktop = ('\\begin{center}\n'
@@ -341,10 +353,12 @@ class BacchTranslator(nodes.NodeVisitor):
         out = self.outclass
         if out == "fullbacch":
             start.append(self.generate_titlepage_full())
-        start.append("\n \\setcounter{tocdepth}{5}\n")
+        #start.append("\n\\setcounter{tocdepth}{-1}\n")
 
         if self.config.bacch_show_toc:
-            start.append('\\tableofcontents \n')
+            start.append(#'\\usecontents{index}{toc}\n'
+                '\\tableofcontents\n\n'
+            )
 
         self.body.append('\n'.join(start))
 
@@ -447,7 +461,7 @@ class BacchHeader(object):
     def set_documentclass(self):
 
         # Initialize Options with Defaults
-        options = ['openright', 'pdftex']
+        options = ['openright', 'pdflatex', 'notitlepage','twoside']
 
         config_font = self.config.bacch_font_size
         if config_font in ['10pt', '12pt']:
@@ -462,13 +476,19 @@ class BacchHeader(object):
     def set_packages(self):
         out = self.outclass
         # Initialize Default Packages
-        packages = {'hyperref' : [''],
+        packages = {#'hyperref' : ['implicit=true'],
                     'titlesec': ['explicit', 'noindentafter'],
                     'fancyhdr': [''],
-                    'titletoc': [''],
                     'setspace': [''],
                     'framed': [''],
-                    'microtype': ['tracking']}
+                    'microtype': ['tracking'],
+                    #'inputenc':['utf8'],
+                    #'cmap':[''],
+                    #'times':[''],
+                    #'longtable':[''],
+                    #'multirow':[''],
+                    'bookmark':['']
+        }
 
         buildtype = self.config.bacch_buildtype
         if out == "fullbacch" and buildtype == 'TPB':
@@ -476,7 +496,7 @@ class BacchHeader(object):
         elif out == "fullbacch" and buildtype == 'SMF':
             packages["geometry"] = ["letterpaper"]
         else:
-            packages["geoemry"] = ["letterpaper"]
+            packages["geometry"] = ["letterpaper"]
 
         for key in packages:
             if packages[key] == ['']:
@@ -522,7 +542,10 @@ class BacchHeader(object):
         # Format Section Breaks
         secbreak_type = self.config.bacch_secbreak
         if secbreak_type == 'short_line':
-            secbreak = '\\rule{5em}{0.25mm}'
+            secbreak = ('\\vspace{1em}'
+                        '\\rule{5em}{0.25mm}'
+                        '\\vspace{1em}'
+            )
         else:
             secbreak = ''
         self.def_command('new', 'showsecbreak', secbreak)
@@ -550,7 +573,8 @@ class BacchHeader(object):
                            '\\titleformat{\\part}'
                            '{\\Huge}{\\thepart}{}'
                            '{\\centering \\uppercase{'
-                           '\\textrm{\\textbf{#1}}}}\n')
+                           '\\textrm{\\textbf{#1}}}}\n'
+        )
 
         # Format Chapter Header Blocks
 
@@ -558,7 +582,6 @@ class BacchHeader(object):
             for key in self.chapheader:
                 separator = self.config.bacch_chapblock_separator
                 block = separator.join(self.chapheader[key]) + '.'
-                print(block)
                 self.def_command('new', key.replace(' ',''), block)
 
         # Format Chapter Header
@@ -566,7 +589,8 @@ class BacchHeader(object):
                            '\\titleformat{\\chapter}'
                            '{}{\\thechapter}{}{}\n'
                            '\\titlespacing{\\chapter}'
-                           '{\\parindent}{\\baselineskip}{-2em}\n')
+                           '{\\parindent}{\\baselineskip}{0em}\n'
+        )
 
         # Format Section Header
         self.header.append('\\titleclass{\\section}{straight}\n'
@@ -593,6 +617,7 @@ class BacchHeader(object):
 
         header_type = self.config.bacch_header_type
 
+        clear = "\\fancyhead{} \\fancyfoot{}"
         command = ''
         if header_type == 'surname-title':
             command1 = ('\\fancyhead[LE]{'
@@ -632,7 +657,7 @@ class BacchHeader(object):
         else:
             command = '\\fancyhead[RO,LE]{%s}' % headfoot_space
 
-        self.header.append(command)
+        self.header.append(clear + command)
 
         # Format Footer
         command = ''
