@@ -62,5 +62,7 @@ def setup(app):
     app.add_config_value('bacch_publisher','','')
     app.add_config_value('bacch_pubcities',[],'')
 
-    
+
+    app.add_config_value('bacch_initlet',None,'')
+    app.add_config_value('bacch_initlet_class',None,'')
 
