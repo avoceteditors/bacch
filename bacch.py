@@ -34,7 +34,10 @@ def setup(app):
     app.add_config_value('bacch_chapter_block',None,'')
     app.add_config_value('bacch_chapblock_separator','--','')
 
+    app.add_config_value('bacch_chapter_number',None,'')
     app.add_config_value('bacch_section_number', False,'')
+
+    app.add_config_value('bacch_sect_numtype',None,'')
     
     app.add_config_value('bacch_show_toc',False,'')
     app.add_config_value('bacch_secbreak','---','')

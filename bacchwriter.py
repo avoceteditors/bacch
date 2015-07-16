@@ -10,7 +10,7 @@ from sphinx.util.compat import Directive
 
 from docutils import nodes, writers
 from docutils.io import StringOutput
-
+import roman
 
 
 class BacchWriter(writers.Writer):
@@ -36,9 +36,19 @@ class BacchTranslator(nodes.NodeVisitor):
 
         self.chapheader = {}
         self.current_chapter = ''
-        self.level = 0
+        self.level = -1
+        self.chapter = 0
         self.header = []
-        self.open = False
+        self.open_quotes = False
+
+        # Configure Section Number Type
+        numtype = self.config.bacch_sect_numtype
+        if numtype == None:
+           numtype = '------'
+        elif len(numtype) < 6:
+            diff = 6 - len(numtype)
+            numtype = numtype + '-' * diff
+        self.sect_numtype = numtype
         
         # Build Calls
         self.assign_node_handlers()
@@ -174,8 +184,8 @@ class BacchTranslator(nodes.NodeVisitor):
         elif match.group(0) == '^':
             return '\\^{}'
         elif match.group(0) == '"':
-            if self.open == True:
-                self.open = False
+            if self.open_quotes == True:
+                self.open_quotes = False
                 return "''"
             else:
                 self.open = True
@@ -197,11 +207,126 @@ class BacchTranslator(nodes.NodeVisitor):
     ########################################
     # Parse Section
     def visit_section(self, node):
-        self.manage_section(node, True)
+        # Increment Section Level
+        self.level = self.level + 1
 
+        title = node.next_node()
+        title = title.astext()
+        numvar = self.numtype_var(self.level)
+        
+        newtext = ''
+        section = [3,4,5]
+        ############################
+        # Determine Header Type
+        if self.level == 1:
+            newtext = self.gen_part(node, title, numvar)
+        elif self.level == 2:
+            newtext = self.gen_chap(node, title, numvar)
+        elif self.level in section:
+            newtext = self.gen_sect(node, title, numvar)
+        
+        self.body.append(newtext)
+
+        
     def depart_section(self, node):
+
+        # Increment Section Level
+        self.level = self.level - 1
         self.manage_section(node, False)
 
+    # Determine Numeric Variable
+    def numtype_var(self, level):
+        var = '*'
+        if self.sect_numtype[level] != '-':
+            var = ''
+
+        return var
+        
+    # Part Formatter
+    def gen_part(self, node, title, numvar):
+        # Set Header
+        header = "\\part%s{%s}\n" % (numvar, title)
+        return header
+
+
+    # Chapter Formatter
+    def gen_chap(self, node, title, numvar):
+    
+        # Init Variables
+        block = topblock = ''
+        blocktype = self.config.bacch_chapter_block
+        commandname = title.replace(' ','')
+        self.current_chapter = title
+        self.chapter = self.chapter + 1
+        
+        head = "\\chapter%s{%s}\n" % (numvar, title) 
+        foot = ("\\phantomsection\n"
+                "\\addcontentsline{toc}{chapter}"
+                "{\\protect \\small %s}\n"
+                "\n") % (title)
+
+        chaptop = ""
+        chapnum = self.config.bacch_chapter_number
+        if chapnum == None:
+            chaptop = "\\vspace{0.75em}"
+        elif chapnum == 'arabic':
+            chaptop = ("\\vspace{0.5em}"
+                       "\\textls[400]{\\bfseries{%s.}}}"
+                       "\\vspace{0.5em}"
+                       "\n") % self.chapter
+        elif chapnum == 'roman':
+            chaptop = ("\\vspace{0.5em}"
+                       "\\textls[400]{\\bfseries{%s.}}}"
+                       "\\vspace{0.5em}"
+                       "\n") % roman.toRoman(self.chapter).lower()
+        elif chapnum == 'Roman':
+            chaptop = ("\\vspace{0.5em}"
+                       "\\textls[400]{\\bfseries{%s.}}}"
+                       "\\vspace{0.5em}"
+                       "\n") % roman.toRoman(self.chapter)
+                    
+        blocktop = ("\\begin{center}\n"
+                    "%s"
+                    "\\textls[400]{\\bfseries{%s}}"
+                    "\\vspace{0.75em}\n"
+                    "\\end{center}"
+                    "\n") % (title.upper(), chaptop)
+        block = ("\\singlespace\n"
+                 "\\textbf{"
+                 "\\scriptsize\\%s}"
+                 "\\vspace{1.75em}\n"
+                 "\n \\noindent" ) % commandname
+        header = '\\newpage' + head + foot
+
+        # Configure Subheader Block
+        if blocktype == 'block':
+            header = header + block
+            self.chapheader[title] = [title]
+        elif blocktype == 'title-block':
+            header = header + blocktop + block
+            self.chapheader[title] = []
+        elif blocktype == "titleonly":
+            header = header + blocktop
+
+        return header
+            
+
+    # Format Section Header
+    def gen_sect(self, node, title, numvar):
+        blocktype = self.config.bacch_chapter_block
+        blockneed = ['title-block', 'block']
+        section = ''
+        if self.level == 4:
+            section = 'sub'
+        elif self.level == 5:
+            section = 'subsub'
+        
+        if blocktype in blockneed:
+            self.chapheader[self.current_chapter].append(title)
+
+        return '\\%ssection%s{%s}\n' % (section, numvar, title)
+        
+        
     def manage_section(self, node, arrive):
         out = self.outclass
         if out == "fullbacch":
