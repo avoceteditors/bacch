@@ -56,7 +56,7 @@ def setup(app):
     app.add_config_value('bacch_title_second','','')
     app.add_config_value('bacch_title_runner','Untitled','')
 
-    app.add_config_value('bach_publisher','','')
+    app.add_config_value('bacch_publisher','','')
     app.add_config_value('bacch_pubcities',[],'')
 
     

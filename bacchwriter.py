@@ -36,7 +36,7 @@ class BacchTranslator(nodes.NodeVisitor):
 
         self.chapheader = {}
         self.current_chapter = ''
-        self.section_level = 0
+        self.level = 0
         self.header = []
         self.open = False
         
@@ -101,13 +101,14 @@ class BacchTranslator(nodes.NodeVisitor):
             ('hlistcol', 'skip'),
             ('image', 'skip'),
             ('index', 'skip'),
-            ('inline', 'skip'),
+            ('inline', 'pass'),
             ('label', 'skip'),
             ('legend', 'skip'),
             ('list_item', 'skip'),
-            ('literal', 'skip'),
+            ('literal', 'pass'),
             ('literal_block', 'skip'),
             ('literal_emphasis', 'skip'),
+            ('literal_inline','pass'),
             ('meta', 'skip'),
             ('option', 'skip'),
             ('option_argument', 'skip'),
@@ -283,7 +284,7 @@ class BacchTranslator(nodes.NodeVisitor):
         header = ''
         header = "\\part*{%s}\n" % title
         content = ('\\phantomsection\n'
-                   '\\addcontentsline{toc}{chapter}'
+                   '\\addcontentsline{toc}{part}'
                    '{\\protect \\small %s }\n') % title
         header = header #+ content
         self.body.append(header)
@@ -297,7 +298,7 @@ class BacchTranslator(nodes.NodeVisitor):
 
         end =('\\phantomsection\n'
               '\\addcontentsline{toc}{chapter}'
-              '{\\protect \\small -- %s}\n'
+              '{\\protect \\small %s}\n'
               '\n') % (title)
         header = '\\newpage\n' + header + end
 
@@ -356,7 +357,7 @@ class BacchTranslator(nodes.NodeVisitor):
         #start.append("\n\\setcounter{tocdepth}{-1}\n")
 
         if self.config.bacch_show_toc:
-            start.append(#'\\usecontents{index}{toc}\n'
+            start.append('\\cleardoublepage'
                 '\\tableofcontents\n\n'
             )
 
@@ -373,12 +374,25 @@ class BacchTranslator(nodes.NodeVisitor):
         titlepage = ('\\begin{titlepage}\n'
                      '\\begin{center}\n \\showhrule\\par \\vspace{5em}'
                      '\\bfseries \\Huge \\textrm{ \\showuptitle} \\par \n\n'
-                     '\\vspace{8em} \\large \\textrm{\\emph{\\showsubtitle}}\n\n'
-                     '\\vspace{5em} \\Large \\showauthor \n'
-                     '\\vspace{1.5em} \\showhrule \n\n'
-                     '\\end{center}\n \\end{titlepage}\n')
-
-        return titlepage
+                     '\\vspace{7.25em} \\large'
+                     '\\textrm{\\emph{\\showsubtitle}}\n\n'
+                     '\\vspace{4.75em} \\Large \\showauthor \n'
+                     '\\vspace{1em} \\showhrule \n\n'
+                     '\\end{center}\n\n')
+        publisher = self.config.bacch_publisher
+        cities = self.config.bacch_pubcities
+        publine = ''
+        if len(cities) > 0:
+            cities = ' + '.join(cities)
+        
+        if publisher != '':
+            publine = ('\\begin{center}'
+                       '\\small \\textbf{\\emph{%s}} \n\n'
+                       '\\footnotesize \\textbf{%s} \n'
+                       '\\end{center} \\end{titlepage}') % (publisher, cities)
+        else:
+            publine = '\\end{titlepage}'
+        return titlepage + publine
 
 
     # Parse Inline Formatting
@@ -394,7 +408,17 @@ class BacchTranslator(nodes.NodeVisitor):
     def depart_emphasis(self, node):
         self.body.append('}')
 
+    def visit_literal(self, node):
+        self.body.append('\\textbf{')
+    def depart_literal(self, node):
+        self.body.apped('}')
 
+    def visit_literal_emphasis(self, node):
+        self.body.append('\\emph{')
+        
+    def depart_literal_emphasis(self, node):
+        self.body.apped('}')
+        
     # Parse Verse
     def visit_line_block(self, node):
         self.body.append('\n\\begin{singlespace} \\begin{verse}\n')
@@ -476,13 +500,13 @@ class BacchHeader(object):
     def set_packages(self):
         out = self.outclass
         # Initialize Default Packages
-        packages = {#'hyperref' : ['implicit=true'],
-                    'titlesec': ['explicit', 'noindentafter'],
+        packages = {'titlesec': ['explicit', 'noindentafter'],
                     'fancyhdr': [''],
                     'setspace': [''],
+                    'titletoc':[''],
                     'framed': [''],
                     'microtype': ['tracking'],
-                    #'inputenc':['utf8'],
+                    'inputenc':['utf8'],
                     #'cmap':[''],
                     #'times':[''],
                     #'longtable':[''],
@@ -574,6 +598,8 @@ class BacchHeader(object):
                            '{\\Huge}{\\thepart}{}'
                            '{\\centering \\uppercase{'
                            '\\textrm{\\textbf{#1}}}}\n'
+                           '\\dottedcontents{part}[1em]'
+                           '{\\protect \\normalsize}{1em}{1em}'
         )
 
         # Format Chapter Header Blocks
@@ -590,6 +616,8 @@ class BacchHeader(object):
                            '{}{\\thechapter}{}{}\n'
                            '\\titlespacing{\\chapter}'
                            '{\\parindent}{\\baselineskip}{0em}\n'
+                           '\\dottedcontents{chapter}[2em]'
+                           '{\\protect \\small}{1em}{1em}'
         )
 
         # Format Section Header
@@ -654,6 +682,17 @@ class BacchHeader(object):
                         '%s \\showsurname %s \\showruntitle %s}'
                         '\n' % (headfoot_size, headfoot_divider, headfoot_space))
             command = command1 + command2
+
+        elif header_type == 'surname-title-chap':
+
+            command1 = ('\\fancyhead[LE]{'
+                        '%s \\showruntitle %s}'
+                        '\n' % (headfoot_size, headfoot_space))
+            command2 = ('\\fancyhead[RO]{'
+                        '%s \\showsurname %s}'
+                        '\n' % (headfoot_size, headfoot_space))
+            command = command1 + command2
+
         else:
             command = '\\fancyhead[RO,LE]{%s}' % headfoot_space
 
