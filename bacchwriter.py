@@ -39,20 +39,42 @@ class BacchTranslator(nodes.NodeVisitor):
         self.level = -1
         self.chapter = 0
         self.header = []
+        self.config.section_opener = False
         self.open_quotes = False
 
         # Configure Section Number Type
         numtype = self.config.bacch_sect_numtype
-        if numtype == None:
-           numtype = '------'
-        elif len(numtype) < 6:
-            diff = 6 - len(numtype)
-            numtype = numtype + '-' * diff
-        self.sect_numtype = numtype
+
+        self.sect_numtype = self.sect_marker(
+            self.config.bacch_sect_numtype)
+        self.config.bacch_initlet = self.sect_marker(
+            self.config.bacch_initlet)
+
+
+        # Add Lettrine Formatting
+        initlet = self.config.bacch_initlet_class
+        initlet_format = '\\textbf'
+        if initlet == 'normal':
+            initlet_format = '\\textbf'
+        elif initlet == 'swabgothic':
+            initlet_format = '\\swabfamily'
+
+        self.config.initlet = initlet_format
+        self.parser = TextParser(self.config)
         
         # Build Calls
         self.assign_node_handlers()
 
+    # Section Markers
+    def sect_marker(self, numtype, maxnum = 6):
+        if numtype == None:
+            numtype = '-' * maxnum
+        else:
+            length = len(numtype)
+            if length < maxnum:
+                numtype = numtype + '-' * (maxnum - length)
+        return numtype
+    
     # Astext Return Value
     def astext(self):
         return ''.join(self.body)
@@ -174,6 +196,8 @@ class BacchTranslator(nodes.NodeVisitor):
     def visit_Text(self, node):
         reserved_latex_chars = '["{}\\\^&\%\$#~_]'
         text = re.sub(reserved_latex_chars, self.escaped_chars, node.astext())
+        text = self.parser.ParseText(
+            text, self.level)
         self.body.append(text)
 
     def escaped_chars(self, match):
@@ -209,7 +233,8 @@ class BacchTranslator(nodes.NodeVisitor):
     def visit_section(self, node):
         # Increment Section Level
         self.level = self.level + 1
-
+        self.config.section_opener = True
+        
         title = node.next_node()
         title = title.astext()
         numvar = self.numtype_var(self.level)
@@ -232,8 +257,8 @@ class BacchTranslator(nodes.NodeVisitor):
 
         # Increment Section Level
         self.level = self.level - 1
-        self.manage_section(node, False)
-
+        self.section_opener = False
+        
     # Determine Numeric Variable
     def numtype_var(self, level):
         var = '*'
@@ -491,7 +516,9 @@ class BacchHeader(object):
                     #'times':[''],
                     #'longtable':[''],
                     #'multirow':[''],
-                    'bookmark':['']
+                    'bookmark':[''],
+                    'lettrine':[''],
+                    'yfonts': ['']
         }
 
         buildtype = self.config.bacch_buildtype
@@ -501,7 +528,7 @@ class BacchHeader(object):
             packages["geometry"] = ["letterpaper"]
         else:
             packages["geometry"] = ["letterpaper"]
-
+            
         for key in packages:
             if packages[key] == ['']:
                 self.header.append('\\usepackage{%s}\n' % key)
@@ -689,8 +716,41 @@ class BacchHeader(object):
         self.header.append(command)
 
 
+###########################
+# Text Parser
+class TextParser():
+
+    # Initialize Class
+    def __init__(self, config):
+        self.config = config
 
 
+    # Parse Text
+    def ParseText(self,text, level):
+        opener = self.config.section_opener
+        if opener:
+            if self.config.bacch_initlet_class != None:
+                text = self.gen_initlet(text, level)
+
+        return text
+        
+    # Generate Initial Letter
+    def gen_initlet(self, text, level):
+        initclass = self.config.bacch_initlet_class
+        if self.config.bacch_initlet[level] != '-':
+            text = text.split(' ')
+            word = text[0]
+            text[0] = ('\\lettrine[lines=2]{%s{%s}}{%s}'
+                    ) % (self.config.initlet, word[0], word[1:])
+            text =  ' '.join(text)
+            
+            self.config.section_opener = False
+        return text
+            
+
+
+            
+    
 ############################
 # General Functions
 
