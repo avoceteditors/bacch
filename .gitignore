@@ -3,3 +3,4 @@
 __pycache__
 bacch.egg-info
 dist
+*.pyc
