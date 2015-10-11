@@ -66,7 +66,7 @@ class BacchTranslator(nodes.NodeVisitor):
 
     # Format Defaults
     def format_defaults(self):
-        chapter = {
+        b_chapter = {
             "name": "chapter",
             "class": "top",
             "format_shape": '',
@@ -91,12 +91,13 @@ class BacchTranslator(nodes.NodeVisitor):
                              '\\bfseries \\MakeTextUppercase{'
             ),
             "title_suffix": '}} \\end{center}',
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_chapter_format = self.set_format(
-            self.config.bacch_chapter_format, chapter)
+            self.config.bacch_chapter_format, b_chapter)
         
-        section = {
+        b_section = {
             "name": "section",
             "class": "top",
             "format_shape": '',
@@ -120,12 +121,13 @@ class BacchTranslator(nodes.NodeVisitor):
                              '\\scshape'
             ),
             "title_suffix": ('}\\par\\vspace{10em}\\end{center}\n\n'),
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_section_format = self.set_format(
-            self.config.bacch_section_format, section)
+            self.config.bacch_section_format, b_section)
 
-        subsection = {
+        b_subsection = {
             "name": "subsection",
             "class": "straight",
             "format_shape": '',
@@ -146,12 +148,13 @@ class BacchTranslator(nodes.NodeVisitor):
             "title_use": False,
             "title_prefix": '',
             "title_suffix": '',
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_subsection_format = self.set_format(
-            self.config.bacch_subsection_format, subsection)
+            self.config.bacch_subsection_format, b_subsection)
 
-        subsubsection = {
+        b_subsubsection = {
             "name": "subsubsection",
             "class": "straight",
             "format_shape": '',
@@ -172,12 +175,13 @@ class BacchTranslator(nodes.NodeVisitor):
             "title_use": False,
             "title_prefix": '',
             "title_suffix": '',
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_subsubsection_format = self.set_format(
-            self.config.bacch_subsubsection_format, subsubsection)
+            self.config.bacch_subsubsection_format, b_subsubsection)
 
-        paragraph = {
+        b_paragraph = {
             "name": "paragraph",
             "class": "straight",
             "format_shape": '',
@@ -198,12 +202,13 @@ class BacchTranslator(nodes.NodeVisitor):
             "title_use": False,
             "title_prefix": '',
             "title_suffix": '',
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_paragraph_format = self.set_format(
-            self.config.bacch_paragraph_format, paragraph)
+            self.config.bacch_paragraph_format, b_paragraph)
 
-        subparagraph = {
+        b_subparagraph = {
             "name": "subparagraph",
             "class": "straight",
             "format_shape": '',
@@ -224,16 +229,212 @@ class BacchTranslator(nodes.NodeVisitor):
             "title_use": False,
             "title_prefix": '',
             "title_suffix": '',
+            "title_alternative": '',
             "par_noindent": True
         }
         self.config.bacch_subparagraph_format = self.set_format(
-            self.config.bacch_subparagraph_format, subparagraph)
+            self.config.bacch_subparagraph_format, b_subparagraph)
 
-        header = {
+        b_header = {
             "headrulewidth": "0pt",
             "footrulewidth": "0pt",
-            "format_head_LE": "\\small \\vspace{0.5em}",
-            "format_head_RO": "\\small \\vspace{0.5em}",
+            "format_head_LE": "\\small \\vspace{0.25in}",
+            "format_head_RO": "\\small \\vspace{0.25in}",
+            "format_head_CE": ' ',
+            "format_head_CO": ' ',
+            "format_head_LO": ' ',
+            "format_head_RE": ' ',
+            "format_foot_LE": "\\small \\thepage \\vspace{0.25in}",
+            "format_foot_RO": "\\small \\thepage \\vspace{0.25in}",
+            "format_foot_CE": ' ',
+            "format_foot_CO": ' ',
+            "format_foot_LO": ' ',
+            "format_foot_RE": ' ',
+            
+            }
+        self.config.bacch_header_format = self.set_format(
+            self.config.bacch_header_format, b_header)
+
+
+        ###############################
+        # Define Gnomon Fomrats
+        g_chapter = {
+            "name": "chapter",
+            "class": "top",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '\\thechapter',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '\\parindent',
+            "spacing_before_sep": '\\baselineskip',
+            "spacing_after_sep": '0em',
+            "spacing_right": '',
+            "contents_use": True,
+            "contents_left": '1em',
+            "contents_above": '\\protect \\small',
+            "contents_label_width":'1em',
+            "contents_leader_width":'1em',
+            "title_use": True,
+            "title_prefix": ('\\begin{center}'
+                             '\\vspace{4em} \\Large'
+                             '\\makebox[\\linewidth][s]{'
+                             '\\bfseries \\MakeTextUppercase{'
+            ),
+            "title_suffix": '}} \\end{center}',
+            "title_alternative": '',
+            "par_noindent": True
+        }
+        self.config.gnomon_chapter_format = self.set_format(
+            self.config.gnomon_chapter_format, g_chapter)
+
+        g_section = {
+            "name": "section",
+            "class": "straight",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '\\thesection',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '\\parindent',
+            "spacing_before_sep": '\\baselineskip',
+            "spacing_after_sep": '0em',
+            "spacing_right": '',
+            "contents_use": True,
+            "contents_left": '2em',
+            "contents_above":'\\protect \\small',
+            "contents_label_width":'1em',
+            "contents_leader_width":'1em',
+            "title_use": False,
+            "title_prefix": ('\\begin{center}'
+                             '\\textls[650]{'
+                             '\\scshape'
+            ),
+            "title_suffix": ('}\\par\\vspace{10em}\\end{center}\n\n'),
+            "title_alternative": '',
+            "par_noindent": True
+        }
+
+        self.config.gnomon_section_format = self.set_format(
+            self.config.gnomon_section_format, g_section)
+
+        g_subsection = {
+            "name": "subsection",
+            "class": "straight",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '\\thesubsection',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '\\parindent',
+            "spacing_before_sep": '1em',
+            "spacing_after_sep": '1em',
+            "spacing_right": '',
+            "contents_use": False,
+            "contents_left": '',
+            "contents_above":'',
+            "contents_label_width":'',
+            "contents_leader_width":'',
+            "title_use": False,
+            "title_prefix": '',
+            "title_suffix": '',
+            "title_alternative": '',
+            "par_noindent": True
+        }
+        self.config.gnomon_subsection_format = self.set_format(
+            self.config.gnomon_subsection_format, g_subsection)
+
+        g_subsubsection = {
+            "name": "subsubsection",
+            "class": "straight",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '\\thesubsubsection',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '\\parindent',
+            "spacing_before_sep": '\\baselineskip',
+            "spacing_after_sep": '-1em',
+            "spacing_right": '',
+            "contents_use": False,
+            "contents_left": '',
+            "contents_above":'',
+            "contents_label_width":'',
+            "contents_leader_width":'',
+            "title_use": False,
+            "title_prefix": '',
+            "title_suffix": '',
+            "title_alternative": '',
+            "par_noindent": True
+        }
+        self.config.gnomon_subsubsection_format = self.set_format(
+            self.config.gnomon_subsubsection_format, g_subsubsection)
+
+        g_paragraph = {
+            "name": "paragraph",
+            "class": "straight",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '',
+            "spacing_before_sep": '',
+            "spacing_after_sep": '',
+            "spacing_right": '',
+            "contents_use": False,
+            "contents_left": '',
+            "contents_above":'',
+            "contents_label_width":'',
+            "contents_leader_width":'',
+            "title_use": False,
+            "title_prefix": '',
+            "title_suffix": '',
+            "title_alternative": '',
+            "par_noindent": True
+        }
+        self.config.gnomon_paragraph_format = self.set_format(
+            self.config.gnomon_paragraph_format, g_paragraph)
+
+        g_subparagraph = {
+            "name": "subparagraph",
+            "class": "straight",
+            "format_shape": '',
+            "format_format": '',
+            "format_label": '',
+            "format_sep": '',
+            "format_before": '',
+            "format_after": '',
+            "spacing_left": '',
+            "spacing_before_sep": '',
+            "spacing_after_sep": '',
+            "spacing_right": '',
+            "contents_use": False,
+            "contents_left": '',
+            "contents_above":'',
+            "contents_label_width":'',
+            "contents_leader_width":'',
+            "title_use": False,
+            "title_prefix": '',
+            "title_suffix": '',
+            "title_alternative": '',
+            "par_noindent": True
+        }
+        self.config.gnomon_subparagraph_format = self.set_format(
+            self.config.gnomon_subparagraph_format, g_subparagraph)
+
+        g_header = {
+            "headrulewidth": "0pt",
+            "footrulewidth": "0pt",
+            "format_head_LE": ("\\small \\vspace{0.25in}"
+                               "\\emph{\\showtitle}"),
+            "format_head_RO": ("\\small \\vspace{0.25in}"
+                               "\\showsectitle"),
             "format_head_CE": ' ',
             "format_head_CO": ' ',
             "format_head_LO": ' ',
@@ -246,8 +447,9 @@ class BacchTranslator(nodes.NodeVisitor):
             "format_foot_RE": ' ',
             
             }
-        self.config.bacch_header_format = self.set_format(
-            self.config.bacch_header_format, header)
+        self.config.gnomon_header_format = self.set_format(
+            self.config.gnomon_header_format, g_header)
+   
 
         
     def set_format(self, parameter, default):
@@ -460,15 +662,21 @@ class BacchTranslator(nodes.NodeVisitor):
             
         # Parse Titles
         head = ''
-        settings = getattr(self.config, 'bacch_%s_format' % kind)
-        
+        build_type = self.config.bacch_build_type
+        settings = getattr(self.config, '%s_%s_format' % (build_type, kind))
+
         if settings["title_use"]:
             head = '\n'.join([settings["title_prefix"],
                              title,
                              settings["title_suffix"]])
+        else:
+            head = settings["title_alternative"]
 
         if settings["par_noindent"]:
             head += '\n\n\\noindent'
+        if build_type == "gnomon" and kind == "section":
+            self.config.section_title = title
+
         base += head
         return base
 
@@ -482,7 +690,7 @@ class BacchTranslator(nodes.NodeVisitor):
         base = ["\\begin{document}\n"]
 
         # Manage Title Page
-        base.append('\\begin{titlepage}\n'
+        titlepage = ('\\begin{titlepage}\n'
                      '\\begin{center}\n\\showhrule\\par\\vspace{5em}'
                      '\\bfseries\\Huge\\textrm{\\showuptitle}\\par\n\n'
                      '\\vspace{7.25em}\\large'
@@ -491,6 +699,26 @@ class BacchTranslator(nodes.NodeVisitor):
                      '\\vspace{1em}\\showhrule\n\n'
                      '\\end{center}\n\n')
 
+        build_type = self.config.bacch_build_type
+        if build_type == "gnomon":
+            titlepage = ('\\begin{titlepage}\n'
+                         '\\showhrule\n\n'
+                         '\\Large\\showsectitle\n\n'
+                         '\\vspace{0.5in}\\hspace{0.5in}'
+                         '\\normalsize\\showauthor\n\n'
+                         '\\vspace{0.5in}\\hspace{0.5in}\\emph{From} \\showtitle')
+
+            if self.config.bacch_subtitle != '':
+                titlepage += (': \\showsubtitle\n\n')
+
+            titlepage += (
+                '\\small\\vspace{0.1in}\\hspace{1in}\\emph{Begun} '
+                '\\showcreatedate\n\n'
+                '\\small\\vspace{0.05in}\\hspace{1in}\\emph{Compiled} ' 
+                '\\showcompiledate\n\n')
+                        
+
+        base.append(titlepage)
         # Manage Publication Line
         publisher = self.config.bacch_publisher
         cities = self.config.bacch_pubcities
@@ -498,19 +726,17 @@ class BacchTranslator(nodes.NodeVisitor):
         if len(cities) > 0:
             cities = ' + '.join(cities)
 
-        if publisher != '':
-            base.append('\\begin{center}'
+        bottomline = ('\\end{titlepage}\n\n')
+        if publisher != '' and build_type != "gnomon":
+            bottomline = ('\\begin{center}'
                        '\\small \\textbf{\\emph{%s}} \n\n'
                        '\\footnotesize \\textbf{%s} \n'
                        '\\end{center} \\end{titlepage}' % (publisher, cities))
-        else:
-            base.append('\\end{titlepage}\n\n')
+        
+        base.append(bottomline)
 
 
-
-
-
-        if self.config.bacch_show_toc == True:
+        if self.config.bacch_show_toc == True and build_type != "gnomon":
             base.append("\\cleardoublepage\n"
                         "\\setcounter{tocdepth}{1}\n"
                         "\\tableofcontents\n\n")
@@ -519,6 +745,7 @@ class BacchTranslator(nodes.NodeVisitor):
         self.body.append(docstart)
 
     def depart_document(self, node):
+        
         header = BacchHeader(self.config)
         self.body.insert(0, header.astext())
         self.body.append('\n\n\\end{document}')

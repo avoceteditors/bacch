@@ -4,11 +4,10 @@
 ###########################
 # Header Class
 class BacchHeader():
-    header = []
 
     def __init__(self, config):
         self.config = config
-
+        self.header = []
         self.set_documentclass()
         self.set_packages()
         self.set_commands()
@@ -53,7 +52,7 @@ class BacchHeader():
             'inputenc':     ['utf8'],
             'bookmark':     [''],
             'lettrine':     [''],
-            'geometry':     ['b5paper'],
+            'geometry':     [''],
             'textcase':     ['']
         }
         build = self.config.bacch_build_type
@@ -84,9 +83,14 @@ class BacchHeader():
             'showsecondtitle': self.config.bacch_title_second,
             'showsubtitle': self.config.bacch_subtitle,
             'showhrule': showhrule,
-            'showsecbreak': '---------'
-
+            'showsecbreak': '---------',
+            'showcreatedate': self.config.bacch_createdate,
+            "showcompiledate": self.config.bacch_compiledate
         }
+
+        if self.config.bacch_build_type == "gnomon":
+            newcommands["showsectitle"] = self.config.section_title
+
 
         renewcommands = {}
 
@@ -115,12 +119,26 @@ class BacchHeader():
 
     # Title Classes, Format and Spacing
     def set_titles(self):
-        titles_config = [self.config.bacch_chapter_format,
-                        self.config.bacch_section_format,
-                        self.config.bacch_subsection_format,
-                        self.config.bacch_subsubsection_format,
-                        self.config.bacch_paragraph_format,
-                        self.config.bacch_subparagraph_format]
+        titles_config = []
+        build_type = self.config.bacch_build_type
+        if build_type == "bacch":
+            titles_config = [self.config.bacch_chapter_format,
+                             self.config.bacch_section_format,
+                             self.config.bacch_subsection_format,
+                             self.config.bacch_subsubsection_format,
+                             self.config.bacch_paragraph_format,
+                             self.config.bacch_subparagraph_format
+            ]
+
+        elif build_type == "gnomon":
+            titles_config =[self.config.gnomon_chapter_format,
+                            self.config.gnomon_section_format,
+                            self.config.gnomon_subsection_format,
+                            self.config.gnomon_subsubsection_format,
+                            self.config.gnomon_paragraph_format,
+                            self.config.gnomon_subparagraph_format
+            ]
+
         base = []
         for var in titles_config:
             base.append('\\titleclass{\\%s}{%s}'
@@ -168,7 +186,13 @@ class BacchHeader():
            
 
     def set_headers(self):
-        header_format = self.config.bacch_header_format
+        header_format = {}
+        build_type = self.config.bacch_build_type
+        if build_type == "bacch":
+            header_format = self.config.bacch_header_format
+        elif build_type == "gnomon":
+            header_format = self.config.gnomon_header_format
+
 
         self.header.append('\\pagestyle{fancy}\n')
         self.header.append('\\fancyhead{}\n\\fancyfoot{}')

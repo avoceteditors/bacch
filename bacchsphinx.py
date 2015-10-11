@@ -4,6 +4,7 @@
 # Module Imports
 import builders.bacchbuilder as bacchbuilder
 import builders.gnomonbuilder as gnomonbuilder
+import time
 
 ###############################
 # General Functions
@@ -57,5 +58,17 @@ def setup(app):
     app.add_config_value('bacch_subparagraph_format',{},'')
     app.add_config_value('bacch_header_format',{},'')
 
+    app.add_config_value('gnomon_chapter_format',{},'')
+    app.add_config_value('gnomon_section_format',{},'')
+    app.add_config_value('gnomon_subsection_format',{},'')
+    app.add_config_value('gnomon_subsubsection_format',{},'')
+    app.add_config_value('gnomon_paragraph_format',{},'')
+    app.add_config_value('gnomon_subparagraph_format',{},'')
+    app.add_config_value('gnomon_header_format',{},'')
 
     app.add_config_value('gnomon_font_size','','')
+
+
+    today = time.strftime('%B %Y')
+    app.add_config_value('bacch_createdate',today,'')
+    app.add_config_value('bacch_compiledate',today,'')

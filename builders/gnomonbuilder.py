@@ -52,7 +52,7 @@ class GnomonBuilder(Builder):
             return ''
 
         if docname.endswith(SEP + 'index'):
-            return docname[:-5]
+            return ''
 
         return docname + SEP
 
@@ -82,13 +82,16 @@ class GnomonBuilder(Builder):
         self.info(bold("Writing documents.."), nonl=True)
 
         for i in docnames:
-            doctree = self.assemble_doctree(i)
-            self.write_doc(i, doctree)
-            outfile = self.get_outfilename(i)
-            ensuredir(os.path.dirname(outfile))
-            self.texfiles.append(outfile)
-            self.write_file(outfile, self.writer.output)
-            self.info("Done %s" % i)
+            if i != 'index':
+                doctree = self.assemble_doctree(i)
+                self.write_doc(i, doctree)
+                outfile = self.get_outfilename(i)
+                ensuredir(os.path.dirname(outfile))
+                self.texfiles.append(outfile)
+                self.write_file(outfile, self.writer.output)
+                self.info("Done %s" % i)
+            else:
+                self.info("Skipping %s" % i)
 
     # Build Doctree
     def assemble_doctree(self, master):
@@ -119,4 +122,4 @@ class GnomonBuilder(Builder):
     def finish(self):
         for i in self.texfiles:
             latex = self.system.latex(self.outdir, i)
-            print(latex)
+            
