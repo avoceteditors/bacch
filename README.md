@@ -12,26 +12,41 @@ Bacch is a Sphinx extension with the specific goal of providing writers from non
 
 
 
-
 ## Documentation
 
 Revised documentation is in development at [Avocet Editorial Consultants](http://avoceteditors.com).
 
+>**NOTE**: Bacch remains in active development.  Parameters and terms are subject to change between now and version 1.0.  Starting in 1.x the repo will branch into master and dev, to provide a more stable platform for users.
 
+### Installation
+
+Bacch requires Python 3 and Sphinx.  It also requires a number of Python modules to be installed on your system.  Expect a proper list of dependencies in the future.
+
+While Python does allow for significant portability in applications, testing and QA for Bacch remains limited at this stage.  Bacch is known to work on Linux and Mac OS X and is expected to work on FreeBSD.  The extent of usability on Windows remains unknown.
+
+You can install Bacch by downloading or cloning the GitHub repository into a directory convenient to you:
+
+```sh
+$ git clone https://github.com/avoceteditors/bacch
+```
+
+By default, Python does not know the path to this directory.  When Sphinx runs, if it can't find the Bacch builders, it immediately aborts the operation.  To show it where to look for Bacch, in the `conf.py` configuration file for each project, add the following lines:
+
+```python
+import sys
+sys.path.insert(0,'/path/to/bacch/')
+extensions = ['bacchsphinx']
+```
+
+This adds your local copy of the Git repository to the Python search path and it adds `bacchsphinx.py` to the list of extensions Sphinx loads when it runs, enabling the Bacch builders.
 
 
 ### Initializing a Project
 
 Currently, there is no script ready to initialize a project.  Follow the standard conventions for Sphinx, or the `sphinx-quickstart` script.
 
->Bear in mind that `sphinx-quickstart` was developed for setting up documentation projects, not books.  The way it configures `conf.py` is not especially useful to writers working outside of this field and genre.  
+>Bear in mind that `sphinx-quickstart` was developed for setting up documentation projects, not books.  The way it configures `conf.py` is not especially useful to writers working outside of this field and genre.
 
-Python does not know where you installed Bacch by default.  When Sphinx runs, if it can't find the builder it aborts the operation.  To show it where to look, add the path to Bacch in the `conf.py` configuration file.
-
-```python
-import sys
-sys.path.insert(0,'/path/to/bacch/')
-```
 
 ### Using Bacch
 
@@ -53,8 +68,6 @@ To build the LaTeX for individual chapters, run:
 ```sh
 $ sphinx-build -b gnomon sourcedir outputdir
 ```
-
-
 
 
 ## Contribution
