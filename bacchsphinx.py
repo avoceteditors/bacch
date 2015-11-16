@@ -19,7 +19,7 @@ def setup(app):
     # Add Builders
     app.add_builder(bacchbuilder.BacchBuilder)
     app.add_builder(gnomonbuilder.GnomonBuilder)
-    
+
     # Custom Nodes
     add_nodes(app)
 
@@ -48,7 +48,8 @@ def setup(app):
     app.add_config_value('bacch_subtitle','','')
 
     app.add_config_value('bacch_build_type','','')
-
+    app.add_config_value('bacch_output_format','','')
+    app.add_config_value('gnomon_output_format','','')
 
     app.add_config_value('bacch_chapter_format',{},'')
     app.add_config_value('bacch_section_format',{},'')
@@ -68,7 +69,13 @@ def setup(app):
 
     app.add_config_value('gnomon_font_size','','')
 
+    app.add_config_value('bacch_project_config',{},'')
+
 
     today = time.strftime('%B %Y')
     app.add_config_value('bacch_createdate',today,'')
     app.add_config_value('bacch_compiledate',today,'')
+
+    app.add_config_value('heron_project_id','Unidentified','')
+
+

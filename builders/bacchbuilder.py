@@ -14,9 +14,10 @@ from sphinx.util.compat import Directive
 from docutils import nodes, writers
 from docutils.io import StringOutput
 
-import writers.bacchwriter as bacchwriter
+import writers.basewriter as basewriter
+import re, subprocess, shutil
 
-#########################
+############################
 # Bacch Project Builder
 class BacchBuilder(Builder):
 
@@ -28,20 +29,21 @@ class BacchBuilder(Builder):
     # Initialization
     def init(self):
         pass
-
+        
+        
     # Outdated Docs
     def get_outdated_docs(self):
         return 'all documents'
 
-    # Prepare Writing
     def prepare_writing(self, docnames):
-        self.writer = bacchwriter.BacchWriter(self.config,
-                                              "bacch")
+        self.config.bacch_build_type = 'bacch'
+        self.writer = basewriter.BaseWriter(self.config)
 
 
     # Get Relative URI's
     def get_relative_uri(self, docname, typ):
         return '%' + docname
+
 
     # Write Function
     def write(self, *ignored):
@@ -57,16 +59,30 @@ class BacchBuilder(Builder):
         doctree = self.assemble_doctree()
         self.info("Done")
 
-
         # Write Document
         self.info(bold("Writing singular document.."), nonl=True)
         self.write_doc(self.config.master_doc, doctree)
-        self.outfile = os.path.join(self.outdir,
-                                    os_path(self.config.master_doc) + self.extension)
-        #self.docfile = os.path.join(self.outdir, os_path(
-        #    self.config.bacch_title.lower().replace(' ','') + '.pdf'))
-        ensuredir(os.path.dirname(self.outfile))
-        self.write_file(self.outfile, self.writer.output)
+        
+        extension = '.tex'
+        writer_type = self.config.bacch_output_format.lower()
+        if writer_type == 'pdf':
+            interext = '.tex'
+            finext = '.pdf'
+        elif writer_type == 'odf':
+            raise ValueError("Bacch current does not support ODF output.")
+ 
+        
+        self.interfile = os.path.join(self.outdir,
+                                    os_path(self.config.master_doc) + interext)
+        self.tmpfile = os.path.join(self.outdir,
+                                    os_path(self.config.master_doc) + finext)
+        title = re.sub(' ','', self.config.bacch_title)
+        self.outfile = title + finext
+
+        
+        ensuredir(os.path.dirname(self.interfile))
+        self.write_file(self.interfile, self.outfile, self.tmpfile,
+                        writer_type, self.writer.output)
         self.info("Done")
 
     # Build Doctree
@@ -78,22 +94,38 @@ class BacchBuilder(Builder):
 
         return tree
 
+
     # Write Document
     def write_doc(self, docname, doctree):
         destination = StringOutput(encoding = 'utf-8')
         output = self.writer.write(doctree, destination)
 
     # Write Files
-    def write_file(self, outfile, content):
+    def write_file(self, interfile, outfile, tmpfile, typ, content):
+        if typ == 'pdf':
+            command = ['pdflatex', '--output-directory', self.outdir,
+                       interfile]
         try:
-            f = codecs.open(outfile, 'w', 'utf-8')
+            f = codecs.open(interfile, 'w', 'utf-8')
             try:
                 f.write(content)
+                try:
+                    subprocess.call(command)
+                    subprocess.call(command)
+                    subprocess.call(command)
+                    subprocess.call(command)
+                except subprocess.CalledProcessError as e:
+                    self.warn(e.output.decode())
+                shutil.copyfile(tmpfile, outfile)
             finally:
                 f.close()
         except(IOError, OSError) as err:
             self.warn("Error writing file %s: %s" % (outfile, err))
 
-    # Final Process
     def finish(self):
         pass
+                
+
+    
+
+

@@ -14,34 +14,31 @@ from sphinx.util.compat import Directive
 from docutils import nodes, writers
 from docutils.io import StringOutput
 
-import writers.bacchwriter as bacchwriter
-import utils.platform as platform
-
-import subprocess
+import writers.basewriter as basewriter
+import subprocess, shutil
 
 #########################
-# Bacch Project Builder
+# Gnomon Project Builder
 class GnomonBuilder(Builder):
 
     name = "gnomon"
     format = "latex"
     extension = ".tex"
     writer = None
-    system = platform.BacchSystem()
-    texfiles = []
-    
+    textfiles = []
+
+
     # Initialization
     def init(self):
         pass
-    
+        
     # Outdated Docs
     def get_outdated_docs(self):
         return self.env.all_docs
 
-    # Prepare Writing
     def prepare_writing(self, docnames):
-        self.writer = bacchwriter.BacchWriter(self.config,
-                                              "gnomon")
+        self.config.bacch_build_type = 'gnomon'
+        self.writer = basewriter.BaseWriter(self.config)
 
     # Get Relative URI's
     def get_relative_uri(self, docname, typ):
@@ -56,20 +53,20 @@ class GnomonBuilder(Builder):
 
         return docname + SEP
 
-    def get_outfilename(self, pagename):
+    def get_filename(self, directory, pagename, extension):
         if pagename == 'index' or pagename.endswith(
                 SEP + 'index'):
 
             outfilename = os.path.join(
-                self.outdir,
-                os_path(pagename) + self.extension)
+                directory,
+                os_path(pagename) + extension)
         else:
             outfilename = os.path.join(
-                self.outdir,
-                pagename + self.extension)
+                directory,
+                pagename + extension)
         return outfilename
+
     
-    # Write Function
     def write(self, *ignored):
         docnames = self.env.all_docs
 
@@ -80,22 +77,32 @@ class GnomonBuilder(Builder):
 
         # Write Document
         self.info(bold("Writing documents.."), nonl=True)
-
+        writer_type = self.config.gnomon_output_format
+        interext = '.tex'
+        outext = '.pdf'
+        if writer_type == 'pdf':
+            interext = '.tex'
+            outext = '.pdf'
+        elif writer_type == 'odf':
+            pass
+        
+        tmpdir = os.path.join(self.outdir, 'tmp')            
         for i in docnames:
             if i != 'index':
                 doctree = self.assemble_doctree(i)
                 self.write_doc(i, doctree)
-                outfile = self.get_outfilename(i)
-                ensuredir(os.path.dirname(outfile))
-                self.texfiles.append(outfile)
-                self.write_file(outfile, self.writer.output)
+
+                interfile = self.get_filename(tmpdir, i, interext)
+                tmpfile = self.get_filename(tmpdir, i, outext)
+                outfile = self.get_filename(self.outdir, i, outext)
+                ensuredir(os.path.dirname(interfile))
+                self.write_file(interfile, tmpfile, outfile, tmpdir,
+                                writer_type, self.writer.output)
                 self.info("Done %s" % i)
             else:
                 self.info("Skipping %s" % i)
 
-    # Build Doctree
     def assemble_doctree(self, master):
-        #master = self.config.master_doc
         tree = self.env.get_doctree(master)
         tree = inline_all_toctrees(self,set(),master,tree,darkgreen)
         tree['docname'] = master
@@ -107,19 +114,28 @@ class GnomonBuilder(Builder):
         destination = StringOutput(encoding = 'utf-8')
         output = self.writer.write(doctree, destination)
 
+
     # Write Files
-    def write_file(self, outfile, content):
+    def write_file(self, interfile, tmpfile,
+                   outfile, tmpdir, typ, content):
+
+        if typ == 'pdf':
+            command = ['pdflatex', '--output-directory', tmpdir,
+                       interfile]
         try:
-            f = codecs.open(outfile, 'w', 'utf-8')
+            f = codecs.open(interfile, 'w', 'utf-8')
             try:
                 f.write(content)
+                try:
+                    subprocess.call(command)
+                except subprocess.CalledProcessError as e:
+                    self.warn(e.output.decode())
+                shutil.copyfile(tmpfile, outfile)
             finally:
                 f.close()
         except(IOError, OSError) as err:
             self.warn("Error writing file %s: %s" % (outfile, err))
 
-    # Final Process
+
     def finish(self):
-        for i in self.texfiles:
-            latex = self.system.latex(self.outdir, i)
-            
+        pass
