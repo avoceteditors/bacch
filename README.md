@@ -55,8 +55,6 @@ Currently, Bacch does not feature a wrapper script to simplify running Sphinx.  
 - **bacch** The default builder compiles the entire project into a single LaTeX file formatted for trade paperback.
 - **gnomon** The review builder compiles each individual file in the source directory into LaTeX formatted to print for editing and review.
 
-Bear in mind, Bacch currently only processes the document into LaTeX and requires an external LaTeX processor, such as `rubber` or `pdflatex` to take the last step in creating a PDF.
-
 To build the LaTeX for the entire project, run:
 
 ```sh
