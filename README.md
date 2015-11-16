@@ -81,6 +81,8 @@ If you notice a bug, would like to make a suggestion or have a feature request: 
 
 Initial Development Releases:
 
+**Version 0.6**: General refactoring.  Separates bacchwriter into basewriter and pdftranslator, making room for ODF support.  PDF conversion now integrated into bacch and gnomon builders.
+
 **Version 0.5**: Reorganization of the repo for better management of code.  Introduces the gnomon builder as a companion to the bacch builder.  Where the bacch builder processes the entire project into LaTeX for a PDF in trade paperback format, gnomon processes single chapters to print at home for review.
 
 **Version 0.4**: Project transitions to straight reST through Sphinx.  XML support abandoned, given the contention that users that write in XML have sufficient skill as to use XSLT on their own, without Bacch.
