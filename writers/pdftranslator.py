@@ -366,7 +366,7 @@ class PDFTranslator():
     
         
     def return_text(self):
-        return '\n'.join(self.document)
+        return ''.join(self.document)
         
 
     

@@ -16,7 +16,7 @@ from docutils.io import StringOutput
 import roman
 
 from writers.pdftranslator import PDFTranslator
-
+from writers.odftranslator import ODFTranslator
 
 ########################################
 # Writer Class
@@ -428,12 +428,13 @@ class BaseTranslator(nodes.NodeVisitor):
     def __init__(self, document, config):
         nodes.NodeVisitor.__init__(self, document)
         self.config = config
-        writer_type = setattr(self.config, '%s_output_format',
-                              self.config.bacch_build_type)
+        build_type = self.config.bacch_build_type
+        
+        writer_type = getattr(self.config, '%s_output_type' % build_type)
         if writer_type == 'pdf':
             self.formatter = PDFTranslator(self.config)
-        elif writer_type != 'pdf':
-            self.formatter = PDFTranslator(self.config)
+        elif writer_type == 'odf':
+            self.formatter = ODFTranslator(self.config)
         else:
             raise ValueError("Error: %s is an invalid output format."
                              "\n" % writer_type)    

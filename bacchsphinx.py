@@ -4,6 +4,7 @@
 # Module Imports
 import builders.bacchbuilder as bacchbuilder
 import builders.gnomonbuilder as gnomonbuilder
+import builders.heronbuilder as heronbuilder
 import time
 
 ###############################
@@ -19,6 +20,7 @@ def setup(app):
     # Add Builders
     app.add_builder(bacchbuilder.BacchBuilder)
     app.add_builder(gnomonbuilder.GnomonBuilder)
+    app.add_builder(heronbuilder.HeronBuilder)
 
     # Custom Nodes
     add_nodes(app)

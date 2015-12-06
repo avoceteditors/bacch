@@ -77,7 +77,7 @@ class GnomonBuilder(Builder):
 
         # Write Document
         self.info(bold("Writing documents.."), nonl=True)
-        writer_type = self.config.gnomon_output_format
+        writer_type = self.config.gnomon_output_type
         interext = '.tex'
         outext = '.pdf'
         if writer_type == 'pdf':
