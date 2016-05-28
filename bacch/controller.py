@@ -28,7 +28,7 @@
 # Placeholder for new main process for Bacch.
 #
 # This module receives arguments from commnand-line script,
-# it then feeds in and out to manage the various processes 
+# it then feeds in and out to manage the various processes
 # in the application.
 
 # Module Imports
@@ -64,7 +64,7 @@ class Bacch():
               'Kenneth P. J. Dyer',
               'Avocet Editorial Consultants',
               'kenneth@avoceteditors.com',
-              version_line       
+              version_line
             ]
             print('\n  '.join(masthead + extra) + '\n')
         elif args.version:
@@ -84,7 +84,7 @@ class Bacch():
         self.mkdir_tree(['.bacch', 'pickle'])
 
 
-        msg = ["Configuring Bacch..."]        
+        msg = ["Configuring Bacch..."]
         if args.verbose:
             extra = ['Defining System Configuration:', '   ' + config_sys_path,
                    'Defining User Configuration:', '   ' + config_user_path,
@@ -104,7 +104,7 @@ class Bacch():
                 f = open(config_pickle, 'br')
                 config = pickle.load(f)
                 f.close()
-                if args.verbose: 
+                if args.verbose:
                     print("   Loading Configuration Pickle")
             except:
                 if args.verbose:
@@ -119,6 +119,10 @@ class Bacch():
         pickle.dump(config, f)
         f.close()
 
+        if args.build is None:
+            config.build = config.builds[0]
+        else:
+            config.build = args.build
 
         data = reader.Reader(args, config)
 
@@ -200,11 +204,9 @@ class Config():
             print("   Defining Metadata")
             print("   Configuration Ready")
 
-        
-
 
     def setdir(self, arg, unit, variable, default):
-       
+
         check = self.set_precedent(unit, variable)
         if arg != default:
             check = arg
@@ -240,8 +242,10 @@ class Config():
         except:
             raise ValueError("Error: No builders defined in bacch.conf")
 
-        builds = builds.split()
-        for build in builds:
+        self.builds = builds.split()
+        self.build = ''
+
+        for build in self.builds:
             self.builders[build] = {}
             for var in self.config_sys["Default"]:
                 try:
