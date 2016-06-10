@@ -4,9 +4,18 @@ __pycache__
 bacch.egg-info
 dist
 *.pyc
-bacch-fail bacch-old bacch-sphinx
+bacch-fail 
+bacch-old 
+bacch-sphinx
 config
 bacch-*
 .*.py.swo
 .*.py.swp
 build
+writers
+.ropeproject/
+utils
+directives
+bacch.org 
+bacch.pyd
+bacch.py
