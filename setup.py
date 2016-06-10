@@ -24,6 +24,9 @@ setup(name = 'bacch',
             'Topic :: Text Processing :: Markup'],
         data_files = [
             (config,
-             ['config/main.conf']
+             [
+                'config/pdf.xsl',
+                'config/pdf-single.xsl',
+                'config/pdf-common.xsl']
              )]
 )

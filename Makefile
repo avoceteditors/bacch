@@ -13,5 +13,3 @@ install-py3:
 install-py2:
 	@$(PY2)
 	
-call:
-	@$(CALL)

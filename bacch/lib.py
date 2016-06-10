@@ -34,3 +34,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN 
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+def report(msg, level = 0):
+    """ Utility Function for Printing to Stdout
+
+    Function recieves two arguments: the message
+    and the indentation level.  It multiplies the
+    indent level by the tab count, then uses both
+    to determine the indentation level.  It then
+    calls print() with indent and msg.
+    """
+    tab = 2
+    space = ' ' * (tab * level)
+    print(space + msg)

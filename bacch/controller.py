@@ -39,15 +39,17 @@ import configparser
 import pickle
 
 from bacch import reader
-
+from bacch import lib
+from bacch import writer
 # Controller Class
 class Bacch():
     """ Main Controller for Bacch
 
     Bacch: Document Generator
 
-    Primary controller class for Bacch.  Receives arguments from
-    the command-line, then uses them to initialize the main processes.
+    Primary controller class for Bacch.  Receives 
+    arguments from the command-line, then uses 
+    them to initialize the main processes.
     """
 
 
@@ -71,191 +73,7 @@ class Bacch():
             print(' - '.join(masthead + [version_line]) + '\n')
             sys.exit(0)
 
-
-        ############### Configuration ########################
-        # Set Paths
-        config_sys_path = os.path.abspath(
-                os.path.join(site.USER_SITE,
-                    'bacch', 'config', 'main.conf'))
-        config_user_path = os.path.abspath(args.config)
-        config_pickle = os.path.abspath(
-                os.path.join('.bacch', 'pickle', 'config.pickle')
-        )
-        self.mkdir_tree(['.bacch', 'pickle'])
-
-
-        msg = ["Configuring Bacch..."]
-        if args.verbose:
-            extra = ['Defining System Configuration:', '   ' + config_sys_path,
-                   'Defining User Configuration:', '   ' + config_user_path,
-                   'Defining Pickled Configuration: ', '   ' + config_pickle]
-            msg = msg + extra
-
-        if args.quiet:
-            print('\n   '.join(msg))
-
-
-        check = self.check_mtime([config_user_path, config_sys_path], config_pickle)
-
-
-        # Load Configuration
-        if check or not args.update:
-            try:
-                f = open(config_pickle, 'br')
-                config = pickle.load(f)
-                f.close()
-                if args.verbose:
-                    print("   Loading Configuration Pickle")
-            except:
-                if args.verbose:
-                    print("   Failed to Load Configuration Pickle")
-                config = Config(args, config_user_path, config_sys_path)
-
-        else:
-            config = Config(args, config_user_path, config_sys_path)
-
-        # Pickle Config
-        f = open(config_pickle, 'bw')
-        pickle.dump(config, f)
-        f.close()
-
-        if args.build is None:
-            config.build = config.builds[0]
-        else:
-            config.build = args.build
-
-        data = reader.Reader(args, config)
-
-
-
-    # Check Directory
-    def mkdir_tree(self, paths):
-        path = os.path.abspath('.')
-        for i in paths:
-            path = os.path.join(path, i)
-            if not os.path.exists(path):
-                os.mkdir(path)
-
-    # Check Mod Time
-    def check_mtime(self, source, target):
-        stime = 0
-        for i in source:
-            try:
-                source = os.path.getmtime(i)
-                if stime > source:
-                    stime = source
-            except:
-                pass
-
-        try:
-            ttime = os.path.getmtime(target)
-        except:
-            return False
-
-        if stime > ttime:
-            return True
-        elif stime < ttime:
-            return False
-        else:
-            raise ValueError(   "Pickler Error: Unable to check "
-                                "modtime on source or pickle.")
-
-
-
-
-
-
-# Configuration Class
-class Config():
-
-    def __init__(self, args, user, system):
-        self.args = args
-
-
-        # Load Configuration Files
-        if args.quiet:
-            print("   Loading System Configuration")
-        self.config_sys = configparser.ConfigParser()
-        self.config_sys.read(system)
-
-        if args.quiet:
-            print("   Loading User Configuration")
-        self.config_user = configparser.ConfigParser()
-        self.config_user.read(user)
-
-        # Define Directories
-        if args.quiet:
-            print("   Defining Directories")
-
-        self.sourcedir = self.setdir(args.source, 'System',
-                'source', 'source')
-        self.outputdir = self.setdir(args.output, 'System',
-                'output', 'build')
-        self.tmpdir = os.path.join('.bacch', 'tmp')
-        paths = [self.outputdir, self.tmpdir]
-        self.make_dir(paths)
-
-        self.set_builds()
-        if args.verbose:
-            print("   Defining Build Configurations")
-
-        self.set_metadata()
-        if args.verbose:
-            print("   Defining Metadata")
-            print("   Configuration Ready")
-
-
-    def setdir(self, arg, unit, variable, default):
-
-        check = self.set_precedent(unit, variable)
-        if arg != default:
-            check = arg
-
-        return check
-
-    def make_dir(self, paths):
-        for path in paths:
-            if not os.path.exists(path):
-                os.mkdir(path)
-
-    def set_precedent(self, unit, variable):
-        try:
-            check = self.config_user[unit][variable]
-        except:
-            check = self.config_sys[unit][variable]
-
-        return check
-
-
-    def set_metadata(self):
-        self.metadata = {}
-        for var in self.config_sys['Metadata']:
-            self.metadata[var] = self.set_precedent('Metadata', var)
-
-    def set_builds(self):
-
-        self.builders = {}
-
-        # Check Builders
-        try:
-            builds = self.config_user["System"]["builders"]
-        except:
-            raise ValueError("Error: No builders defined in bacch.conf")
-
-        self.builds = builds.split()
-        self.build = ''
-
-        for build in self.builds:
-            self.builders[build] = {}
-            for var in self.config_sys["Default"]:
-                try:
-                    check = self.config_user[build][var]
-                except:
-                    check = self.config_sys['Default'][var]
-                self.builders[build][var] = check
-
-
-
-
+        xml = reader.Reader(args)
+        xml_parser = writer.Writer(args, xml.fetch())
 
 
