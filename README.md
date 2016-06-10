@@ -1,5 +1,8 @@
 # Bacch
 
+>*Notice*: Due to recent hassles, Bacch is in transition from the Sphinx extension it's operated as up to this point into an XML-based static site and document generator.  It's also being retooled for stable distributions over PyPI.  Check back later for updates.
+
+
 Writers that work on large projects such as books or documentation, often encounter various technical limitations in word processors.  While a word processor can prove effective in smaller works, such as letters and resumes, as the project grows they become progressively more difficult to work in.  Consistent chapter and section counts, management of typesetting and project statistics increase exponentially with the scale of the project.
 
 Documentation writers have had a handle on these issues for decades.  Instead of trying to do everything from one large application, the job is broken up into a number of smaller programs.  You write your docs in a text editor using a markup language of some kind to show how each file fits with the project and then you run a program on the source directory, processing the files to produce a website or a PDF.  The Python Project developed Sphinx in order to meet this latter functionality.
