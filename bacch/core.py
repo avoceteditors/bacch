@@ -2,7 +2,7 @@
 # Module Imports
 import logging
 import sys
-
+from bacch import config as bacch_config
 
 ##########################################################################
 # Main Process Class
@@ -42,7 +42,9 @@ class Main():
 
 
         # Configure Bacch
-
+        log(args, 'info', 'Configuring Bacch.')
+        bacchconf = bacch_config.Config(args)
+        log(args, 'info', 'Done configuration.')
 
 ##########################################################################
 # General Functions
