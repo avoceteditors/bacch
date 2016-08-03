@@ -15,11 +15,11 @@ class Config():
         self.args = args
 
         # Parse Configuration Files
-        config = self.get_configs()
+        self.config = self.set_configs()
 
 
-    # Fetch Configuration Options
-    def get_configs(self):
+    # Define Configuration Options
+    def set_configs(self):
         
         # Find System Configuration
         config_sys = prototype_config()
@@ -55,8 +55,8 @@ class Config():
             setattr(config.build_default, key, value)
 
 
-        builders = config.system_builders.split(',')
-        for build in builders:
+        config.builders = config.system_builders.split(',')
+        for build in config.builders:
 
             # Set Build Name
             setattr(config, 'build_%s' % build, ConfigObject)
@@ -81,9 +81,46 @@ class Config():
 
         return config
 
+    # Fetch Config
+    def get_config(self):
+        """ Fetch Configuration Object, with CLI Overrides
+
+        This method access the configuration object as defined in the
+        set_configs() method and returns it to the control module.  It also
+        overrides the existing settings with arguments from the command-line.
+        """
+        ##########################
+        # Command-line Overrides
+
+        # Override Source
+        if self.args.source is not None:
+            self.config.system_source = self.args.source
+
+        # Override Output
+        if self.args.output is not None:
+            self.config.system_output = self.args.output
+
+        ###########################
+        # Operations
+        setattr(self.config, 'update_all', self.args.update)
+        setattr(self.config, 'book_build', self.args.book)
+        setattr(self.config, 'verbose', self.args.verbose)
+        
+        build = self.args.build
+        if build is None:
+            build = self.config.builders[0]
+        setattr(self.config, 'build', build) 
+
+        return self.config
+
+
+
 ##########################################################################
-# Configuration Object
+# Cos Configuration Object
 class ConfigObject():
+    """"
+    Configuration object, used in storing values for later reference.
+    """
     pass
 
 
