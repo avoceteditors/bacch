@@ -153,7 +153,8 @@ def prototype_config():
         "System": {
             "source": "source",
             "output": "output",
-            "builders": "Default"
+            "builders": "Default",
+            "extension": "rst"
 
         },
         "Metadata": {
