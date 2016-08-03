@@ -3,6 +3,9 @@
 import os, os.path
 import re
 
+from bacch import core as bacch_core
+from bacch import parser as bacch_parser
+
 ##########################################################################
 # Reader Class
 class Reader():
@@ -13,6 +16,14 @@ class Reader():
 
         # Load File List
         filelist = self.get_filelist()
+
+        # Parse Source
+        for key in filelist:
+            bacch_core.log(self.config.verbose, 'info',
+                    '-Parsing: %s' % key)
+
+            # Parse File
+            data = bacch_parser.Parser(config, filelist[key])
 
 
     # Determine File List
@@ -34,6 +45,7 @@ class Reader():
                 path = os.path.abspath(
                         os.path.join(self.config.system_source, i))
                 file_list[name] = {
+                    "name": name,
                     "filename": i,
                     "path": path
                 }
