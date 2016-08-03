@@ -3,6 +3,9 @@
 import configparser
 import os.path
 
+from bacch import core as bacch_core
+
+
 ##########################################################################
 # Configuration Class
 class Config():
@@ -31,12 +34,57 @@ class Config():
             local_config = None
 
         # Initialize config Object
-        config = object
+        config = ConfigObject()
 
-        # Set Attributes
-        for unit in config_sys:
-            print(unit)
+        # Set Base Attributes
+        for unit in ["System", "Metadata"]:
+            unitname = unit.lower()
+            for key in config_sys[unit]:
+                parameter = "%s_%s" % (unitname, key)
+                try:
+                    value = config_local[unit][key]
+                except:
+                    value = config_sys[unit][key]
 
+                setattr(config, parameter, value)
+
+        # Set Default Build Attributes
+        setattr(config, 'build_default', ConfigObject)
+        for key in config_sys["Build"]:
+            value = config_sys["Build"][key]
+            setattr(config.build_default, key, value)
+
+
+        builders = config.system_builders.split(',')
+        for build in builders:
+
+            # Set Build Name
+            setattr(config, 'build_%s' % build, ConfigObject)
+
+            # Load Build Config
+            try:
+                local = config_local['Build: %s' % build]
+            except:
+                bacch_core.log(self.args, 'warn', 
+                        "Build %s is invalid, reverting to defaults" % build)
+                local = config_sys['Build']
+
+            # Set Configs
+            build_conf = getattr(config, 'build_%s' % build)
+            for key in config_sys['Build']:
+                try:
+                    value = local[key]
+                except:
+                    value = getattr(config.build_default, key)
+
+                setattr(build_conf, key, value)
+
+        return config
+
+##########################################################################
+# Configuration Object
+class ConfigObject():
+    pass
 
 
 ##########################################################################
@@ -62,7 +110,9 @@ def prototype_config():
     base_config = {
         "System": {
             "source": "source",
-            "output": "output"
+            "output": "output",
+            "builders": "Default"
+
         },
         "Metadata": {
             "title": "Untitled",
