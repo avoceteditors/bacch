@@ -3,6 +3,8 @@
 import logging
 import sys
 from bacch import config as bacch_config
+from bacch import reader as bacch_reader
+
 
 ##########################################################################
 # Main Process Class
@@ -42,15 +44,21 @@ class Main():
 
 
         # Configure Bacch
-        log(args, 'info', 'Configuring Bacch.')
+        log(args.verbose, 'info', 'Configuring Bacch')
         bacchconf = bacch_config.Config(args)
-        log(args, 'info', 'Done configuration.')
+        config = bacchconf.get_config()
+        log(args.verbose, 'info', 'Configuration Complet')
+
+        # Read Project
+        log(args.verbose, 'info', 'Reading Project')
+        reader = bacch_reader.Reader(config)
+        log(args.verbose, 'info', 'Read Complete')
 
 ##########################################################################
 # General Functions
 
 # Logging Function
-def log(args, level, msg):
+def log(arg, level, msg):
 
     if level == 'debug':
         level = 'DEBUG'
@@ -69,7 +77,7 @@ def log(args, level, msg):
         logging.critical(msg)
 
     # Verbose
-    if args.verbose:
+    if arg:
         print("[%s]: %s" % (level, msg))
 
 

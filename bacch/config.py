@@ -65,7 +65,7 @@ class Config():
             try:
                 local = config_local['Build: %s' % build]
             except:
-                bacch_core.log(self.args, 'warn', 
+                bacch_core.log(self.args.verbose, 'warn', 
                         "Build %s is invalid, reverting to defaults" % build)
                 local = config_sys['Build']
 
@@ -110,6 +110,11 @@ class Config():
         if build is None:
             build = self.config.builders[0]
         setattr(self.config, 'build', build) 
+
+        # Nonconfigurable Variables
+        setattr(self.config, 'workdir', '.bacch')
+        setattr(self.config, 'pickledir', 
+                os.path.join('.bacch', 'pickle'))
 
         return self.config
 
