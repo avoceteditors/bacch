@@ -1,6 +1,7 @@
 ##########################################################################
 # Module Imports
-
+import configparser
+import os.path
 
 ##########################################################################
 # Configuration Class
@@ -16,7 +17,25 @@ class Config():
 
     # Fetch Configuration Options
     def get_configs(self):
-        pass
+        
+        # Find System Configuration
+        config_sys = prototype_config()
+
+        # Find Local Configuration
+        localpath = self.args.config
+
+        if os.path.exists(localpath):
+            local_config = configparser.ConfigParser()
+            local_config.read(localpath)
+        else:
+            local_config = None
+
+        # Initialize config Object
+        config = object
+
+        # Set Attributes
+        for unit in config_sys:
+            print(unit)
 
 
 
@@ -31,7 +50,9 @@ def prototype_config():
     from a local or system level file created during installation.
     However, such an implementation would prove distracting during
     early stages of development.  As such, we have created this function,
-    which simply returns a dict object with the relevant configs.
+    which simply returns a dict object with the relevant configs.  Its
+    functionality will be deprecated at a later date, but it'll be left
+    in place for testing purposes.
 
     The return dict imitates the configparser read() method, with
     top level units and second level parameters and values.
