@@ -56,7 +56,7 @@ class Main():
 
         # Call Builder
         log(args.verbose, 'info', 'Building Project')
-        builder = bacch_builder.Builder(config, reader)
+        #builder = bacch_builder.Builder(config, reader)
         log(args.verbose, 'info', 'Build Complete')
 
 ##########################################################################
