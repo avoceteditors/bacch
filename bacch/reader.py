@@ -25,6 +25,9 @@ class Reader():
             # Parse File
             data = bacch_parser.Parser(config, filelist[key])
 
+            # Log Files
+            filelist[key]["data"] = data
+        self.data = filelist
 
     # Determine File List
     def get_filelist(self):
@@ -53,4 +56,6 @@ class Reader():
         return file_list
     
 
-
+    # Return Filelist
+    def fetch_data(self):
+        return self.data

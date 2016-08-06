@@ -4,7 +4,7 @@ import logging
 import sys
 from bacch import config as bacch_config
 from bacch import reader as bacch_reader
-
+from bacch import builder as bacch_builder
 
 ##########################################################################
 # Main Process Class
@@ -53,6 +53,11 @@ class Main():
         log(args.verbose, 'info', 'Reading Project')
         reader = bacch_reader.Reader(config)
         log(args.verbose, 'info', 'Read Complete')
+
+        # Call Builder
+        log(args.verbose, 'info', 'Building Project')
+        builder = bacch_builder.Builder(config, reader)
+        log(args.verbose, 'info', 'Build Complete')
 
 ##########################################################################
 # General Functions
