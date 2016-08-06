@@ -55,9 +55,13 @@ class Main():
         log(args.verbose, 'info', 'Read Complete')
 
         # Call Builder
-        log(args.verbose, 'info', 'Building Project')
+        #log(args.verbose, 'info', 'Building Project')
         #builder = bacch_builder.Builder(config, reader)
-        log(args.verbose, 'info', 'Build Complete')
+        #log(args.verbose, 'info', 'Build Complete')
+
+
+        # Close
+        log(args.verbose, 'info', 'Closing Bacch')
 
 ##########################################################################
 # General Functions
@@ -66,23 +70,23 @@ class Main():
 def log(arg, level, msg):
 
     if level == 'debug':
-        level = 'DEBUG'
+        level = '[DEBUG]:    '
         logging.debug(msg)
     elif level == 'info':
-        level = 'INFO'
+        level = '[INFO]:     '
         logging.info(msg)
     elif level == 'warn':
-        level = 'WARNING'
+        level = '[WARNING]:  '
         logging.warning(msg)
     elif level == 'error':
-        level = 'ERROR'
+        level = '[ERROR]:    '
         logging.error(msg)
     elif level == 'critical':
-        level = 'CRITICAL'
+        level = '[CRITICAL]: '
         logging.critical(msg)
 
     # Verbose
     if arg:
-        print("[%s]: %s" % (level, msg))
+        print("%s%s" % (level, msg))
 
 

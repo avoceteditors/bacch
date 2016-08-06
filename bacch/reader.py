@@ -19,8 +19,8 @@ class Reader():
 
         # Parse Source
         for key in filelist:
-            bacch_core.log(self.config.verbose, 'info',
-                    '-Parsing: %s' % key)
+            bacch_core.log(self.config.verbose, 'debug',
+                    '-Parsing: %s' % filelist[key]['filename'])
 
             # Parse File
             data = bacch_parser.Parser(config, filelist[key])

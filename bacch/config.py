@@ -154,7 +154,7 @@ def prototype_config():
             "source": "source",
             "output": "output",
             "builders": "Default",
-            "extension": "rst"
+            "extension": "md"
 
         },
         "Metadata": {
