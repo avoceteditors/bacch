@@ -2,6 +2,7 @@
 # Module Imports
 import logging
 import sys
+import datetime
 from bacch import config as bacch_config
 from bacch import reader as bacch_reader
 from bacch import builder as bacch_builder
@@ -12,6 +13,9 @@ class Main():
 
     # Initialize Class
     def __init__(self, args):
+
+        # Start Timer
+        start = datetime.datetime.now()
 
         # Masthead
         name = 'Bacch: The Website & Document Generator'
@@ -61,7 +65,10 @@ class Main():
 
 
         # Close
-        log(args.verbose, 'info', 'Closing Bacch')
+        end = datetime.datetime.now()
+        diff = end - start
+        msg = 'Build finished in... %s seconds' % diff.total_seconds()
+        print(msg)
 
 ##########################################################################
 # General Functions
