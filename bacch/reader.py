@@ -22,11 +22,20 @@ class Reader():
             bacch_core.log(self.config.verbose, 'debug',
                     '-Parsing: %s' % filelist[key]['filename'])
 
+            ##########################
             # Parse File
-            data = bacch_parser.Parser(config, filelist[key])
+            parser = bacch_parser.Parser(config, filelist[key])
+
+
+            # Initial Parse
+            parser.initial()
+
+            # Medial Parse
+            parser.medial()
+
 
             # Log Files
-            filelist[key]["data"] = data
+            #ilelist[key]["data"] = parser.get_data()
         self.data = filelist
 
     # Determine File List
