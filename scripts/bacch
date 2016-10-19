@@ -10,6 +10,7 @@ if __name__ == '__main__':
     # Options
     parser.add_argument('-c', '--config', default = 'bacch.json')
     parser.add_argument('-v', '--verbose', action = 'store_true')
+    parser.add_argument('--debug', action = 'store_true')
 
     # Commands
     parser.add_argument('-S', '--sync', action = 'store_true')

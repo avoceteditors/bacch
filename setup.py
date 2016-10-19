@@ -18,9 +18,12 @@ setup(name = 'bacch',
         license = 'BSD 3-clause',
         packages = ['bacch'],
         scripts = ['scripts/bacch'],
+        install_requires = ['docker-py'],
+        data_files = [
+                (os.path.join('etc', 'bacch'), [os.path.join("config", "Dockerfile")])
+            ],
         classifiers = [
             'Development Status :: 2 - Pre-Alpha',
             'Environment :: Console',
             'Topic :: Text Processing :: Markup'],
-        data_files = []
 )

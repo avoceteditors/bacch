@@ -1,13 +1,27 @@
 # Moduel Imports
 import datetime
 import sys
+import logging
+
 import bacch.docker
+
 
 # Run Main Process
 def run(args):
 
-    # Initialize Timer
+    # Initialize Bacch
     time_start = datetime.datetime.now()
+
+    if args.debug:
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.INFO
+
+    logging.basicConfig(
+        filename = "bacch.log",
+        level = loglevel
+    )
+    logging.info("Starting Bacch")
 
     ######################
     # Masthead
@@ -23,7 +37,7 @@ def run(args):
                 'Version %s' % version, '']
         masthead =  '\n  '.join(content)
     else:
-        masthead = ' - version'.join([name, version])
+        masthead = ' - version '.join([name, version])
 
     print(masthead)
 
