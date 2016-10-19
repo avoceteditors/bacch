@@ -7,7 +7,6 @@ dist
 bacch-fail 
 bacch-old 
 bacch-sphinx
-config
 bacch-*
 .*.py.swo
 .*.py.swp
