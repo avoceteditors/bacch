@@ -41,10 +41,6 @@ def run(args):
 
     print(masthead)
 
-    ######################
-    # Docker
-    orientdb = bacch.docker.Control(args)
-
     # Exit Bacch
     time_end = datetime.datetime.now()
     time_diff = time_end - time_start
