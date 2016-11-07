@@ -1,0 +1,15 @@
+{
+	"SYSTEM": {
+        "builders": ["Main"],
+        "source": "source",
+        "output": "build",
+        "tmp": ".bacch",
+        "log": "bacch.log",
+        "extension": "md"
+    },
+	"METADATA": {},
+    "BUILDS": {
+    	"DEFAULT_BUILD": {}
+    }
+
+}

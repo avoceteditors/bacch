@@ -20,7 +20,7 @@ setup(name = 'bacch',
         scripts = ['scripts/bacch'],
         install_requires = ['docker-py'],
         data_files = [
-                (os.path.join('etc', 'bacch'), [os.path.join("config", "bacch.json")])
+                (os.path.join('etc', 'bacch'), [os.path.join("config", "book.json")])
             ],
         classifiers = [
             'Development Status :: 2 - Pre-Alpha',
