@@ -1,10 +1,7 @@
 # Module Imports
-import markdown
 import re
 import os.path
-import xml.etree.ElementTree as etree
-
-import bacch.parser
+import docutils.core
 
 ##################################
 # File Reader
@@ -19,47 +16,11 @@ class Read():
         self.content = f.read()
         f.close()
 
-        #content = re.sub('<', '&lt;', content)
-        #content = re.sub('>', '&gt;', content)
+        self.doctree = docutils.core.publish_doctree(
+                self.content)
 
-        extensions = [
-            'markdown.extensions.meta',
-            'markdown.extensions.attr_list',
-            'markdown.extensions.fenced_code',
-            'outline',
-            'markdown.extensions.tables',
-            'markdown.extensions.headerid(forceid=False)',
-            'pymdownx.github(no_nl2br=False)',
-            'pymdownx.superfences'
-            ]
-
-        # Read into HTML
-        try:
-            md = markdown.Markdown(extensions)
-            html = md.convert(self.content)
-            html = '<div id="content">%s</div>' % html
-            try:
-                xml = etree.fromstring(html)
-            except etree.ParseError as err:
-                xml = None
-                msg = 'Invalid XML: Unable to read %s, due to %s' % (path, err)
-
-        except:
-            md = None
-            html = None
-            xml = None
-
-        # Load Metadata
-        try:
-            meta = md.Meta
-        except:
-            meta = {}
-
-        # Parse
-        if xml is None:
-            print("Error")
-        else:
-            self.data = bacch.parser.block(xml)
+        # Compile Metadata
+        self.compile_metadata()
 
 
     # Fetch Document Stats
@@ -77,5 +38,13 @@ class Read():
         return stats
 
 
+
+    # Compile Metadata
+    def compile_metadata(self):
+
+        metadata = {
+            "date": "2014-01-01 00:00 EST",
+            "tags": []
+        }
 
 

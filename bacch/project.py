@@ -100,6 +100,8 @@ class Project():
                     "mtime": mtime,
                     "data": data,
                     "stats": stats
+                }
 
-                    
-                    }
+
+
+

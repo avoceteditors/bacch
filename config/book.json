@@ -5,7 +5,7 @@
         "output": "build",
         "tmp": ".bacch",
         "log": "bacch.log",
-        "extension": "md"
+        "extension": "rst"
     },
 	"METADATA": {},
     "BUILDS": {
