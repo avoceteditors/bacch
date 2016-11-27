@@ -85,22 +85,34 @@ class Project():
             path = i[1]
 
             name = os.path.splitext(fname)[0]
-            ctime = os.path.getctime(path)
             mtime = os.path.getmtime(path)
 
-            data = bacch.read.Read(self.config, path)
+            try:
+                old_mtime = self.file_list[name]['mtime']
+                if old_mtime < mtime:
+                    self.read_file(name, path, fname, mtime)
 
-            stats = data.fetch_stats()
-            stats['bytes'] = os.path.getsize(path)
+            except:
+                self.read_file(name, path, fname, mtime)
 
-            self.file_data[name] = {
-                    "filename": fname,
-                    "path": path,
-                    "ctime": ctime,
-                    "mtime": mtime,
-                    "data": data,
-                    "stats": stats
-                }
+
+
+    def read_file(self, name, path, fname, mtime):
+        ctime = os.path.getctime(path)
+        data = bacch.read.Read(self.config, path)
+
+        stats = data.fetch_stats()
+        stats['bytes'] = os.path.getsize(path)
+
+        self.file_data[name] = {
+                "filename": fname,
+                "path": path,
+                "ctime": ctime,
+                "mtime": mtime,
+                "data": data,
+                "stats": stats
+            }
+
 
 
 

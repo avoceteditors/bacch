@@ -1,0 +1,190 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Block	build/lib/bacch/blocks.py	/^class Block():$/;"	c
+BytesIO	build/lib/bacch/docker.py	/^from io import BytesIO$/;"	i
+CALL	Makefile	/^CALL = bacch$/;"	m
+ChildrenDirective	bacch/directives/children.py	/^class ChildrenDirective(Directive):$/;"	c
+Control	build/lib/bacch/database.py	/^class Control():$/;"	c
+Control	build/lib/bacch/docker.py	/^class Control():$/;"	c
+Diirective	bacch/directives/children.py	/^from docutils.parser.rst import directives, Diirective$/;"	i
+Log	bacch/log.py	/^class Log():$/;"	c
+Log	build/lib/bacch/log.py	/^class Log():$/;"	c
+OUT	Makefile	/^OUT = test\/test-output$/;"	m
+PY2	Makefile	/^PY2 = python2 $(SETUP)$/;"	m
+PY3	Makefile	/^PY3 = python3 $(SETUP) $/;"	m
+Paragraph	build/lib/bacch/blocks.py	/^class Paragraph(Block):$/;"	c
+Project	bacch/project.py	/^class Project():$/;"	c
+Project	build/lib/bacch/data.py	/^class Project():$/;"	c
+Project	build/lib/bacch/project.py	/^class Project():$/;"	c
+Read	bacch/read.py	/^class Read():$/;"	c
+Read	build/lib/bacch/read.py	/^class Read():$/;"	c
+SETUP	Makefile	/^SETUP = setup.py install --user$/;"	m
+SRC	Makefile	/^SRC = test\/test-source$/;"	m
+__init__	bacch/log.py	/^    def __init__(self, config):$/;"	m	class:Log
+__init__	bacch/project.py	/^    def __init__(self, config, log):$/;"	m	class:Project
+__init__	bacch/read.py	/^    def __init__(self, config, path):$/;"	m	class:Read
+__init__	build/lib/bacch/blocks.py	/^    def __init__(self, content):$/;"	m	class:Block
+__init__	build/lib/bacch/data.py	/^    def __init__(self, config, log):$/;"	m	class:Project
+__init__	build/lib/bacch/database.py	/^    def __init__(self, config):$/;"	m	class:Control
+__init__	build/lib/bacch/docker.py	/^    def __init__(self, args):$/;"	m	class:Control
+__init__	build/lib/bacch/log.py	/^    def __init__(self, config):$/;"	m	class:Log
+__init__	build/lib/bacch/project.py	/^    def __init__(self, config, log):$/;"	m	class:Project
+__init__	build/lib/bacch/read.py	/^    def __init__(self, config, path):$/;"	m	class:Read
+author	setup.py	/^        author = 'Kenneth P. J. Dyer',$/;"	v
+author_email	setup.py	/^        author_email = 'kenneth@avoceteditors.com',$/;"	v
+bacch	bacch/core.py	/^import bacch.config$/;"	i
+bacch	bacch/core.py	/^import bacch.log$/;"	i
+bacch	bacch/core.py	/^import bacch.project$/;"	i
+bacch	bacch/project.py	/^import bacch.read$/;"	i
+bacch	build/lib/bacch/core.py	/^import bacch.config$/;"	i
+bacch	build/lib/bacch/core.py	/^import bacch.log$/;"	i
+bacch	build/lib/bacch/core.py	/^import bacch.project$/;"	i
+bacch	build/lib/bacch/parser.py	/^import bacch.blocks$/;"	i
+bacch	build/lib/bacch/project.py	/^import bacch.read$/;"	i
+bacch_description	setup.py	/^bacch_description = "Document processor for fiction and nonfiction book writers, based on Sphinx."$/;"	v
+block	build/lib/bacch/parser.py	/^def block(xml):$/;"	f
+blocks	build/lib/bacch/parser.py	/^import bacch.blocks$/;"	i
+build_list	bacch/project.py	/^    def build_list(self, path, match):$/;"	m	class:Project
+build_list	build/lib/bacch/data.py	/^    def build_list(self, path, match):$/;"	m	class:Project
+build_list	build/lib/bacch/project.py	/^    def build_list(self, path, match):$/;"	m	class:Project
+classifiers	setup.py	/^        classifiers = [$/;"	v
+compile_metadata	bacch/read.py	/^    def compile_metadata(self):$/;"	m	class:Read
+compile_metadata	build/lib/bacch/read.py	/^    def compile_metadata(self):$/;"	m	class:Read
+config	bacch/__init__.py	/^from . import config$/;"	i
+config	bacch/core.py	/^import bacch.config$/;"	i
+config	build/lib/bacch/__init__.py	/^from . import config$/;"	i
+config	build/lib/bacch/core.py	/^import bacch.config$/;"	i
+config	setup.py	/^config = os.path.join(lib, 'bacch', 'config')$/;"	v
+configure	bacch/config.py	/^def configure(args):$/;"	f
+configure	build/lib/bacch/config.py	/^def configure(args):$/;"	f
+core	bacch/read.py	/^import docutils.core$/;"	i
+core	build/lib/bacch/read.py	/^import docutils.core$/;"	i
+critical	bacch/log.py	/^    def critical(self, msg):$/;"	m	class:Log
+critical	build/lib/bacch/log.py	/^    def critical(self, msg):$/;"	m	class:Log
+data_files	setup.py	/^        data_files = [$/;"	v
+datetime	bacch/core.py	/^import datetime$/;"	i
+datetime	build/lib/bacch/core.py	/^import datetime$/;"	i
+debug	bacch/log.py	/^    def debug(self, msg):$/;"	m	class:Log
+debug	build/lib/bacch/log.py	/^    def debug(self, msg):$/;"	m	class:Log
+description	setup.py	/^        description = bacch_description,$/;"	v
+directives	bacch/directives/children.py	/^from docutils.parser.rst import directives, Diirective$/;"	i
+docker	build/lib/bacch/docker.py	/^import docker$/;"	i
+dockerfile	build/lib/bacch/docker.py	/^def dockerfile(passwd):$/;"	f
+docutils	bacch/read.py	/^import docutils.core$/;"	i
+docutils	build/lib/bacch/read.py	/^import docutils.core$/;"	i
+dump	bacch/project.py	/^def dump(log, data, path):$/;"	f
+dump	build/lib/bacch/data.py	/^def dump(log, data, path):$/;"	f
+dump	build/lib/bacch/project.py	/^def dump(log, data, path):$/;"	f
+error	bacch/log.py	/^    def error(self, msg):$/;"	m	class:Log
+error	build/lib/bacch/log.py	/^    def error(self, msg):$/;"	m	class:Log
+etree	build/lib/bacch/parser.py	/^import xml.etree.ElementTree as etree$/;"	i
+fetch_stats	bacch/read.py	/^    def fetch_stats(self):$/;"	m	class:Read
+fetch_stats	build/lib/bacch/read.py	/^    def fetch_stats(self):$/;"	m	class:Read
+get_passwd	build/lib/bacch/database.py	/^    def get_passwd(self, unit, name):$/;"	m	class:Control
+get_user	build/lib/bacch/database.py	/^    def get_user(self, unit, name):$/;"	m	class:Control
+getpass	build/lib/bacch/database.py	/^import getpass$/;"	i
+info	bacch/log.py	/^    def info(self, msg):$/;"	m	class:Log
+info	build/lib/bacch/log.py	/^    def info(self, msg):$/;"	m	class:Log
+install_requires	setup.py	/^        install_requires = ['docker-py'],$/;"	v
+json	bacch/config.py	/^import json$/;"	i
+json	build/lib/bacch/config.py	/^import json$/;"	i
+lib	setup.py	/^lib = site.USER_SITE$/;"	v
+license	setup.py	/^        license = 'BSD 3-clause',$/;"	v
+load	bacch/project.py	/^def load(config, log, path):$/;"	f
+load	build/lib/bacch/data.py	/^def load(config, log, path):$/;"	f
+load	build/lib/bacch/project.py	/^def load(config, log, path):$/;"	f
+load_config	bacch/config.py	/^def load_config(path):$/;"	f
+load_config	build/lib/bacch/config.py	/^def load_config(path):$/;"	f
+log	bacch/__init__.py	/^from . import log$/;"	i
+log	bacch/core.py	/^import bacch.log$/;"	i
+log	build/lib/bacch/__init__.py	/^from . import log$/;"	i
+log	build/lib/bacch/core.py	/^import bacch.log$/;"	i
+logging	bacch/log.py	/^import logging$/;"	i
+logging	build/lib/bacch/log.py	/^import logging$/;"	i
+mkdir	bacch/core.py	/^def mkdir(path):$/;"	f
+mkdir	build/lib/bacch/core.py	/^def mkdir(path):$/;"	f
+os	bacch/config.py	/^import os.path$/;"	i
+os	bacch/core.py	/^import os$/;"	i
+os	bacch/core.py	/^import os.path$/;"	i
+os	bacch/log.py	/^import os.path$/;"	i
+os	bacch/project.py	/^import os$/;"	i
+os	bacch/project.py	/^import os.path$/;"	i
+os	bacch/read.py	/^import os.path$/;"	i
+os	build/lib/bacch/config.py	/^import os.path$/;"	i
+os	build/lib/bacch/core.py	/^import os$/;"	i
+os	build/lib/bacch/core.py	/^import os.path$/;"	i
+os	build/lib/bacch/data.py	/^import os$/;"	i
+os	build/lib/bacch/data.py	/^import os.path$/;"	i
+os	build/lib/bacch/log.py	/^import os.path$/;"	i
+os	build/lib/bacch/project.py	/^import os$/;"	i
+os	build/lib/bacch/project.py	/^import os.path$/;"	i
+os	build/lib/bacch/read.py	/^import os.path$/;"	i
+os	setup.py	/^import os.path$/;"	i
+packages	setup.py	/^        packages = ['bacch'],$/;"	v
+parse_html	build/lib/bacch/blocks.py	/^    def parse_html(self):$/;"	m	class:Block
+parse_latex	build/lib/bacch/blocks.py	/^    def parse_latex(self):$/;"	m	class:Block
+path	bacch/config.py	/^import os.path$/;"	i
+path	bacch/core.py	/^import os.path$/;"	i
+path	bacch/log.py	/^import os.path$/;"	i
+path	bacch/project.py	/^import os.path$/;"	i
+path	bacch/read.py	/^import os.path$/;"	i
+path	build/lib/bacch/config.py	/^import os.path$/;"	i
+path	build/lib/bacch/core.py	/^import os.path$/;"	i
+path	build/lib/bacch/data.py	/^import os.path$/;"	i
+path	build/lib/bacch/log.py	/^import os.path$/;"	i
+path	build/lib/bacch/project.py	/^import os.path$/;"	i
+path	build/lib/bacch/read.py	/^import os.path$/;"	i
+path	setup.py	/^import os.path$/;"	i
+pickle	bacch/project.py	/^import pickle$/;"	i
+pickle	build/lib/bacch/data.py	/^import pickle$/;"	i
+pickle	build/lib/bacch/project.py	/^import pickle$/;"	i
+project	bacch/__init__.py	/^from . import project$/;"	i
+project	bacch/core.py	/^import bacch.project$/;"	i
+project	build/lib/bacch/__init__.py	/^from . import project$/;"	i
+project	build/lib/bacch/core.py	/^import bacch.project$/;"	i
+pyorient	build/lib/bacch/database.py	/^import pyorient$/;"	i
+re	bacch/project.py	/^import re$/;"	i
+re	bacch/read.py	/^import re$/;"	i
+re	build/lib/bacch/data.py	/^import re$/;"	i
+re	build/lib/bacch/project.py	/^import re$/;"	i
+re	build/lib/bacch/read.py	/^import re$/;"	i
+read	bacch/__init__.py	/^from . import read$/;"	i
+read	bacch/project.py	/^import bacch.read$/;"	i
+read	build/lib/bacch/__init__.py	/^from . import read$/;"	i
+read	build/lib/bacch/project.py	/^import bacch.read$/;"	i
+read_data	bacch/project.py	/^    def read_data(self):$/;"	m	class:Project
+read_data	build/lib/bacch/data.py	/^    def read_data(self):$/;"	m	class:Project
+read_data	build/lib/bacch/project.py	/^    def read_data(self):$/;"	m	class:Project
+read_file	bacch/project.py	/^    def read_file(self, name, path, fname, mtime):$/;"	m	class:Project
+read_file	build/lib/bacch/project.py	/^    def read_file(self, name, path, fname, mtime):$/;"	m	class:Project
+run	bacch/__init__.py	/^from .core import run$/;"	i
+run	bacch/core.py	/^def run(args):$/;"	f
+run	bacch/directives/children.py	/^    def run(self):$/;"	m	class:ChildrenDirective
+run	build/lib/bacch/__init__.py	/^from .core import run$/;"	i
+run	build/lib/bacch/core.py	/^def run(args):$/;"	f
+scripts	setup.py	/^        scripts = ['scripts\/bacch'],$/;"	v
+set_config	bacch/config.py	/^def set_config(path, config):$/;"	f
+set_config	build/lib/bacch/config.py	/^def set_config(path, config):$/;"	f
+setup	setup.py	/^from distutils.core import setup$/;"	i
+shutil	bacch/config.py	/^import shutil$/;"	i
+shutil	build/lib/bacch/config.py	/^import shutil$/;"	i
+site	setup.py	/^import site$/;"	i
+sys	bacch/config.py	/^import sys$/;"	i
+sys	bacch/core.py	/^import sys$/;"	i
+sys	build/lib/bacch/config.py	/^import sys$/;"	i
+sys	build/lib/bacch/core.py	/^import sys$/;"	i
+sys	setup.py	/^import sys$/;"	i
+sysconfig	bacch/config.py	/^import sysconfig$/;"	i
+sysconfig	build/lib/bacch/config.py	/^import sysconfig$/;"	i
+update_config	bacch/project.py	/^    def update_config(self, config, log):$/;"	m	class:Project
+update_config	build/lib/bacch/data.py	/^    def update_config(self, config, log):$/;"	m	class:Project
+update_config	build/lib/bacch/project.py	/^    def update_config(self, config, log):$/;"	m	class:Project
+url	setup.py	/^        url = 'https:\/\/github.com\/avoceteditors\/bacch',$/;"	v
+version	setup.py	/^        version = '0.6',$/;"	v
+warn	bacch/log.py	/^    def warn(self, msg):$/;"	m	class:Log
+warn	build/lib/bacch/log.py	/^    def warn(self, msg):$/;"	m	class:Log
+xml	build/lib/bacch/parser.py	/^import xml.etree.ElementTree as etree$/;"	i

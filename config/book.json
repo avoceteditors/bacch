@@ -9,7 +9,10 @@
     },
 	"METADATA": {},
     "BUILDS": {
-    	"DEFAULT_BUILD": {}
+    	"DEFAULT_BUILD": {
+            "format": "html"
+        
+        }
     }
 
 }

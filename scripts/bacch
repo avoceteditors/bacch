@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
     # Commands
     parser.add_argument('-S', '--sync', action = 'store_true')
+    parser.add_argument('-b', '--build', default = 'DEFAULT_BUILD')
 
     args = parser.parse_args()
     bacch.run(args)

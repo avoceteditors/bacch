@@ -1,0 +1,8 @@
+{
+	"SYSTEM": {
+        "builders": ["DEFAULT_BUILD"]
+    },
+	"METADATA": {},
+	"DEFAULT_BUILD": {}
+
+}
