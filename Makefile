@@ -16,5 +16,5 @@ install-py3:
 install-py2:
 	@$(PY2)
 
-bacch-base:
-	@bacch -v -s $(SRC) -o $(OUT)
+call:
+	@bacch -Svk test 

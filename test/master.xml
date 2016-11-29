@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<series xml:id="test" version="5.0"
+	xmlns="http://docbook.org/ns/docbook"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:bacch="http://avoceteditors.com/2016/bacch">
+
+<info>
+<title>Bacch: Test Project</title>
+
+<authorgroup>
+
+<author>
+<personname>
+<firstname>Kenneth</firstname>
+<othername>P. J.</othername>
+<surname>Dyer</surname></personname>
+<email>kenneth@avoceteditors.com</email>
+</author>
+
+</authorgroup>
+
+<abstract>
+<para>
+These pages provide a test environment for Bacch XML parsing.
+</para>
+</abstract>
+
+</info>
+
+<bacch:config>
+
+<!-- Resources -->
+<bacch:resources>
+<bacch:resource id="source" role="src"/>
+</bacch:resources>
+
+<bacch:builds>
+<bacch:build id="html" path="output/html" type="web" format="pdf"/>
+<bacch:build id="pdf" path="output/pdf" type="books" format="pdf"/>
+</bacch:builds>
+
+<!-- Books -->
+<bacch:book id="book1"/>
+
+
+<!-- Prompt Configration -->
+<bacch:prompts>
+
+<bacch:prompt id="orientdb">
+<bacch:ps role="1">orientdb&gt; </bacch:ps>
+<bacch:ps role="2">          </bacch:ps>
+</bacch:prompt>
+
+<bacch:prompt id="mysql">
+<bacch:ps role="1">mysql&gt; </bacch:ps>
+<bacch:ps role="2">       </bacch:ps>
+</bacch:prompt>
+
+<bacch:prompt id="shu"> <!-- User Shell -->
+<bacch:ps role="1">$ </bacch:ps>
+<bacch:ps role="2">      </bacch:ps>
+</bacch:prompt>
+
+<bacch:prompt id="shr"> <!-- Root Shell -->
+<bacch:ps role="1"># </bacch:ps>
+<bacch:ps role="2">      </bacch:ps>
+</bacch:prompt>
+</bacch:prompts>
+
+</bacch:config>
+
+</series>

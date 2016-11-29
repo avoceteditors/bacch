@@ -10,7 +10,7 @@ lib = site.USER_SITE
 config = os.path.join(lib, 'bacch', 'config')
 
 setup(name = 'bacch',
-        version = '0.6',
+        version = '0.7',
         author = 'Kenneth P. J. Dyer',
         author_email = 'kenneth@avoceteditors.com',
         url = 'https://github.com/avoceteditors/bacch',
@@ -18,9 +18,8 @@ setup(name = 'bacch',
         license = 'BSD 3-clause',
         packages = ['bacch'],
         scripts = ['scripts/bacch'],
-        install_requires = ['docker-py'],
+        install_requires = [],
         data_files = [
-                (os.path.join('etc', 'bacch'), [os.path.join("config", "book.json")])
             ],
         classifiers = [
             'Development Status :: 2 - Pre-Alpha',

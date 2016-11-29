@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<chapter id="chap0101" version="5.0"
+	xmlns="http://docbook.org/ns/docbook"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<info>
+<title>Chapter 1: Abstract Tests</title>
+<abstract>
+<para>
+This chapter tests the functionality of abstracts and their use in links and siimilar functions.
+</para>
+</abstract>
+</info>
+
+
+<para>
+The main goal of the abstract test is to render the block in the containing text of links.  For instance, in MySQL documentation if I hover over a link for <code>SELECT</code> statements, I want to see a short description of what <code>SELECT</code> does.
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+<emphasis role="strong">Current Link Test</emphasis>: Tests XLink to current file: <link xlink:href="chap0101"/>.  
+</para>
+</listitem>
+
+<listitem>
+<para>
+<emphasis role="strong">External Link Test</emphasis>: Tests XLink to external file: <link xlink:href="chap0101-sect1"/>.
+</para>
+</listitem>
+
+<listitem>
+<para>
+<emphasis role="strong">Internal Link Test</emphasis>: Tests XLink to a section in the current file: <link xlink:href="chap0101-sect2"/>.
+</para>
+</listitem>
+
+<listitem>
+<para>
+<emphasis role="strong">External Link Test</emphasis>: Tests XLink to external resource: <link xlink:href="http://en.wikipedia.org"/>
+</para>
+</listitem>
+
+<listitem>
+<para>
+<emphasis role="strong">Custom Title Link Test</emphasis>: Tests XLink with custom title: <link xlink:href="chap0101">Custom Title</link>
+</para>
+</listitem>
+
+<listitem>
+<para>
+<emphasis role="strong">Link Format Test</emphasis>: Tests XLink with custom formatting: <link xlink:href="chap0101-sect3"/>
+</para>
+</listitem>
+
+</itemizedlist>
+
+<para>
+In the event that all tests pass, you should see links running through the above items.  With the exception of the Custom Title test, failing tests should appear as blank spaces after the colons, or some other unexpected results.
+</para>
+
+<para>
+Resource titles change over time as projects develop.  Rather than requiring the writer to rewrite link text every time there's a change in titles, Bacch supports custom rendering of title text. <code>&lt;link xlink:href="resource"/&gt;</code> retrieves the title from the given resource along with the abstract text.  Additionally, setting the <code>bacch:format</code> attribute on the resource block allows you to apply formatting variables to the output.
+</para>
+
+<bacch:include href="ch0101-sect1" />
+
+<section id="chap0101-sect2">
+<info>
+<title>Section 2</title>
+<abstract>
+<para>
+Testing whether abstract text renders when linking to internal sections on a given page.
+</para>
+</abstract>
+
+<para>
+The above tests show whether abstract text can be pulled into links when rendered from the root-element in a given file.  I'm using this test to determine whether the same applies to sections contained within files.
+</para>
+</info>
+
+	
+</section>
+
+<section id="chap0101-sect3" bacch:format="code">
+<info>
+<title>Section 3</title>
+<abstract>
+<para>
+The purpose of this test is to add formatting variables to the link output.
+</para>
+</abstract>
+</info>
+
+<para>
+For this test, I want to see if I can render formatting variables into link output.  For instance, in the case of MySQL documentation, when I link to pages like <code>SELECT</code> I want the output to render with a monospace font in links.
+</para>
+	
+</section>
+
+</chapter>

@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+import argparse
+import bacch
+
+if __name__ == '__main__':
+
+    # Initialize Parser
+    parser = argparse.ArgumentParser()
+
+    # Source XML
+    parser.add_argument('-s', '--source', default = 'master.xml')
+    parser.add_argument('-k', '--wdir')
+    parser.add_argument('-b', '--build')
+
+    # Options
+    parser.add_argument('-S', '--sync', action='store_true')
+    parser.add_argument('-v', '--verbose', action='store_true')
+
+
+    # Parse Arguments
+    args = parser.parse_args()
+
+    bacch.run(args)
+
