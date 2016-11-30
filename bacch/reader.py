@@ -7,6 +7,9 @@ import bacch
 
 # Reader Class
 class Reader():
+    """ Reads project files and organizes the data and
+    provides methods for the builder to operate on.
+    """
 
     def __init__(self, args):
         self.master = args.source
@@ -28,13 +31,23 @@ class Reader():
         # Save Data
         self.save_data()
 
-
+    
+    # Pickle Data
     def save_data(self):
+        """ Takes the current state of the data varaible
+        and serializes it using the pickle module.
+        """
         f = open(self.pickle_path, 'wb')
         pickle.dump(self.data, f)
         f.close()
 
+    # Load Pickle
     def load_data(self, args):
+        """ Loads the data variable from pickle.  In the
+        event that the file is unavailable or any of the
+        content has changed since the last update, it
+        reloads the relevant data.
+        """
         
         self.pickle_path = os.path.join('.bacch', 'bacch.pickle')
 
@@ -55,8 +68,13 @@ class Reader():
             config = self.update_config(args)
             config['args'] = args
             self.update_data(args, config)
-      
+     
+    # Check Configuration
     def check_config(self, config):
+        """ Method checks the current state of the 
+        configuration data.  If the master.xml file has
+        changed since the last run, it updates the config.
+        """
         newmtime = os.path.getmtime(self.master)
         try:
             if newmtime > config['mtime']:
@@ -66,8 +84,10 @@ class Reader():
         except:
             return True
 
-    
+    # Update Configuration 
     def update_config(self, args):
+        """ Method udpates the configuration data.
+        """
 
         # Open Master File
         f = open(self.master, 'rb')
@@ -157,8 +177,11 @@ class Reader():
         config['ns'] = self.namespaces
 
         return config
-        
+       
+    # Update Data
     def update_data(self, args, config):
+        """ Method updates the project data.
+        """
 
         resources = config['resources']
         sourcedir = None
@@ -190,6 +213,8 @@ class Reader():
                     self.data['content'][name] = read
 
         
-
+    # Retrieve Data
     def fetch_data(self):
+        """ Retrieves data on project reads for the builder.
+        """
         return self.data

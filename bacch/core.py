@@ -8,6 +8,12 @@ import bacch
 
 # Main Process
 def run(args):
+    """ Main Control Function.
+
+    Receives command-line arguments (argparse) then runs
+    the Bacch the main process.  Intended primarily for
+    use by the ``bacch`` command script.
+    """
 
     ######################
     # Initialize Timer

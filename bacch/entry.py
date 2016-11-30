@@ -4,7 +4,12 @@ import os, os.path
 
 # Entry Class
 class Entry():
+    """ Handler for file-level XML reads.  Provides methods
+    in preparing and organizing the data during the read to
+    save on performance later.
+    """
 
+    # Initialize Class
     def __init__(self, args, sourcedir, config, filename, name):
         self.path = os.path.join(sourcedir, filename)
         self.config = config
@@ -13,13 +18,22 @@ class Entry():
 
         self.sects = {}
 
+    # Check Status of Read
     def check_status(self):
+        """ Method checks whether the file has been updated
+        since it was last read.  In the event that it has
+        been updated, it reloads the XML.
+        """
         newmtime = os.path.getmtime(self.path)
 
         if newmtime > self.mtime or self.args.sync:
             self.update()
-
+    
+    # Update XML Read
     def update(self):
+        """ Method reads the XML from file.
+        """
+
         # Open File
         f = open(self.path, 'rb')
         content = f.read()
@@ -34,11 +48,23 @@ class Entry():
         # Load Section Data
         self.load_sections()
 
+    # Retrieve Sections
     def fetch_sections(self):
+        """ Returns the section data, including idrefs,
+        titles and abstract text for links.
+        """
+
         return self.sects
 
+    # Load Sections
     def load_sections(self):
-        matches = ['series', 'book', 'part', 'chapter', 'section']
+        """ Reads section data from the XML doctree, finding
+        each book, chapter and section from the file and
+        saves the idrefs, titles and abstracts.
+        """
+
+        matches = ['series', 'book', 'part', 'chapter', 
+                'section']
         match = '|//book:'
         base = '//book:' + match.join(matches)
 
