@@ -1,72 +1,72 @@
-<?xml version='1.0' encoding='utf-8' ?>
-<series xml:id="test" version="5.0"
-	xmlns="http://docbook.org/ns/docbook"
-	xmlns:xi="http://www.w3.org/2001/XInclude"
-	xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project id="master" version="5.0"
+		xmlns:book="http://docbook.org/ns/docbook"
+		xmlns:xi="http://www.w3.org/2001/XInclude"
+		xmlns="http://avoceteditors.com/2016/bacch">
 
-<info>
-<title>Bacch: Test Project</title>
-
-<authorgroup>
-
-<author>
-<personname>
-<firstname>Kenneth</firstname>
-<othername>P. J.</othername>
-<surname>Dyer</surname></personname>
-<email>kenneth@avoceteditors.com</email>
-</author>
-
-</authorgroup>
+<book:info>
+	<book:title>Bacch: Test Project</book:title>
 
 <abstract>
 <para>
-These pages provide a test environment for Bacch XML parsing.
+These pages provide a test environment for Bacch XML rendering.
 </para>
 </abstract>
+</book:info>
 
-</info>
+ 
+<!-- ################ CONTENT ################## -->
+<content>
+	<include href="book1" />
+</content>
 
-<bacch:config>
-
-<!-- Resources -->
-<bacch:resources>
-<bacch:resource id="source" role="src"/>
-</bacch:resources>
-
-<bacch:builds>
-<bacch:build id="html" path="output/html" type="web" format="pdf"/>
-<bacch:build id="pdf" path="output/pdf" type="books" format="pdf"/>
-</bacch:builds>
-
-<!-- Books -->
-<bacch:book id="book1"/>
+<!-- ############## CONFIGURATON ################ -->
+<config>
 
 
-<!-- Prompt Configration -->
-<bacch:prompts>
+<!-- #### Resource Directories #### -->
+<resources>
+	<resource id="source" role="src"/>
+</resources>
 
-<bacch:prompt id="orientdb">
-<bacch:ps role="1">orientdb&gt; </bacch:ps>
-<bacch:ps role="2">          </bacch:ps>
-</bacch:prompt>
+<!-- #### Build Configuration #### -->
+<builds>
+<build id="html" path="output/html" element="*" format="html"/>
+<build id="latex" path="output/latex" element="book" format="latex"/>
+</builds>
 
-<bacch:prompt id="mysql">
-<bacch:ps role="1">mysql&gt; </bacch:ps>
-<bacch:ps role="2">       </bacch:ps>
-</bacch:prompt>
 
-<bacch:prompt id="shu"> <!-- User Shell -->
-<bacch:ps role="1">$ </bacch:ps>
-<bacch:ps role="2">      </bacch:ps>
-</bacch:prompt>
+<!-- #### Block Configuration #### -->
+<blocks>
 
-<bacch:prompt id="shr"> <!-- Root Shell -->
-<bacch:ps role="1"># </bacch:ps>
-<bacch:ps role="2">      </bacch:ps>
-</bacch:prompt>
-</bacch:prompts>
 
-</bacch:config>
 
-</series>
+<!-- Prompt Substitutiion -->
+<prompts>
+<prompt id="orientdb">
+<ps role="1">orientdb&gt; </ps>
+<ps role="2">          </ps>
+</prompt>
+
+<prompt id="mysql">
+<ps role="1">mysql&gt; </ps>
+<ps role="2">       </ps>
+</prompt>
+
+<prompt id="sh$">
+<ps role="1">$ </ps>
+<ps role="2">      </ps>
+</prompt>
+
+<prompt id="sh#">
+<ps role="1"># </ps>
+<ps role="2">      </ps>
+</prompt>
+
+</prompts>
+
+
+</blocks>
+</config>
+
+</project>

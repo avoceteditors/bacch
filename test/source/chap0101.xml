@@ -15,7 +15,7 @@ This chapter tests the functionality of abstracts and their use in links and sii
 
 
 <para>
-The main goal of the abstract test is to render the block in the containing text of links.  For instance, in MySQL documentation if I hover over a link for <code>SELECT</code> statements, I want to see a short description of what <code>SELECT</code> does.
+The <emphasis>main</emphasis> goal of the abstract test is to render the block in the containing text of links.  For instance, in MySQL documentation if I hover over a link for <code>SELECT</code> statements, I want to see a short description of what <code>SELECT</code> does.
 </para>
 
 <itemizedlist>
@@ -65,7 +65,7 @@ In the event that all tests pass, you should see links running through the above
 Resource titles change over time as projects develop.  Rather than requiring the writer to rewrite link text every time there's a change in titles, Bacch supports custom rendering of title text. <code>&lt;link xlink:href="resource"/&gt;</code> retrieves the title from the given resource along with the abstract text.  Additionally, setting the <code>bacch:format</code> attribute on the resource block allows you to apply formatting variables to the output.
 </para>
 
-<bacch:include href="ch0101-sect1" />
+<bacch:include href="chap0101-sect1" />
 
 <section id="chap0101-sect2">
 <info>

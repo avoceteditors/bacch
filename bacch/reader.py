@@ -101,16 +101,20 @@ class Reader():
             "prompts": {},
             "books": {},
             'builds': {},
-            'mtime': mtime
+            'mtime': mtime,
+            'doctree': None
         } 
- 
+
+        # Fetch Doctree
         doctree = ET.fromstring(content)
+        config['doctree'] = doctree
+
         ######################
         # Configuration
         config_data = doctree.xpath('bacch:config', 
                 namespaces=self.namespaces)[0]
 
-      
+         
         # Resource
         base = config_data.xpath('bacch:resources/*',
                 namespaces=self.namespaces)
@@ -131,7 +135,7 @@ class Reader():
 
 
         # Prompt Cofiguration
-        base = config_data.xpath('bacch:prompts',
+        base = config_data.xpath('bacch:blocks/bacch:prompts',
                 namespaces = self.namespaces)[0]
         
         for i in base:
@@ -154,13 +158,14 @@ class Reader():
             iattr = i.attrib
             name = iattr['id']
             path = iattr['path']
-            typ = iattr['type']
+            element = iattr['element']
             form = iattr['format']
 
             config['builds'][name] = {
                 'path': path,
-                'type': typ,
-                'form': form
+                'element': element,
+                'format': form,
+
             }
 
         # Books
@@ -175,7 +180,7 @@ class Reader():
             config['books'][name] = {}
 
         config['ns'] = self.namespaces
-
+        self.data['config'] = config 
         return config
        
     # Update Data
@@ -218,3 +223,32 @@ class Reader():
         """ Retrieves data on project reads for the builder.
         """
         return self.data
+
+    # Retrieve Doctrees
+    def fetch_doctrees(self):
+        """Retrieves doctrees on project reads only.
+
+        For use in cases where you don't need additional processing.
+        """
+        content = self.data['content']
+        newdata = []
+
+        for i in content:
+            entry = content[i]
+            xml = entry.fetch()
+            
+            newdata.append(xml)
+            
+
+        return newdata
+
+    # Check for File Resource
+    def check_data(self, idref):
+        if idref in self.data:
+            return True
+        else:
+            return False
+
+    # Fetch Data Keys
+    def fetch_keys(self):
+        return list(self.data["content"].keys())

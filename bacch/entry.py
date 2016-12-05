@@ -56,6 +56,11 @@ class Entry():
 
         return self.sects
 
+    # Retrieve Doctree
+    def fetch(self):
+        """ Returns the lxml Doctree for this file."""
+        return self.doctree
+
     # Load Sections
     def load_sections(self):
         """ Reads section data from the XML doctree, finding

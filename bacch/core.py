@@ -52,7 +52,13 @@ def run(args):
 
     ######################
     # Builder
-    build = bacch.builder(args, read)
+    if args.build is not None:
+        conf, build = bacch.builder(read)
+
+        # Writer
+        for tree in build:
+            writer = bacch.Writer(read, tree, conf)
+            writer.write()
 
     ######################
     # Exit
@@ -62,3 +68,12 @@ def run(args):
     msg = 'Operation completed in %s seconds' % count
     print(msg)
     sys.exit(0)
+
+
+
+############################
+# Fetch Namespace from Element
+def getns(element):
+
+    print(element.tag)
+    return 'yes'

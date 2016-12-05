@@ -18,7 +18,6 @@ The purpose of this chapter is to test how Bacch renders inline formatting optio
 </para>
 
 <itemizedlist>
-
 <listitem>
 <para>
 Bold Test: <emphasis role="strong">bold</emphasis>
