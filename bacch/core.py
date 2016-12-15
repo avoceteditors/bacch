@@ -1,77 +1,96 @@
-# Moduel Imports
+# Module Imports
 import datetime
 import sys
 import os
-import os.path
+import bacch
 
-import bacch.config
-import bacch.log
-import bacch.project
 
-##########################################
-# Helper Functions
-def mkdir(path):
+###################
+# Exit Bacch
+def exit(exit_code):
+    time_end = datetime.datetime.now()
+    time_diff = time_end - bacch.time_start
+    sec = round(time_diff.total_seconds(), 2)
+    close_msg = '\nOperation completed in %s seconds' % sec
+    print(close_msg)
+    sys.exit(exit_code)
+
+def makedir(path):
     if not os.path.exists(path):
         os.mkdir(path)
+    elif os.path.isfile(path):
+        bacch.log.critical('Invalid Directory Path (isFile): %s' % path)
+        sys.exit(1)
 
-
-
-##########################################
-# Run Main Process
+   
+###################
+# Main Process
 def run(args):
 
-    # Initialize Bacch
+    ###################
+    # Init Start Timer
     time_start = datetime.datetime.now()
+    setattr(bacch, 'time_start', time_start)
 
-    ######################
+    ###################
     # Masthead
-    name = 'Bacch - The Document Generator'
-    version = '0.10'
-
     if args.verbose:
         content = [
-                name,
-                'Kenneth P. J. Dyer',
-                'Avocet Editorial Consultants',
-                'kenneth@avoceteditors.com',
-                'Version %s' % version, '']
-        masthead =  '\n  '.join(content)
+            '%s - %s' % (bacch.__name__, bacch.__slogan__),
+            bacch.__author__,
+            bacch.__author_email__,
+            'Version %s' % bacch.__version__, '']
+        masthead = '\n  '.join(content)
     else:
-        masthead = ' - version '.join([name, version])
+        masthead = '%s - version %s' % (bacch.__name__, bacch.__version__)
 
     print(masthead)
 
-    #########################
-    # Configure Bacch
-    config = bacch.config.configure(args)
-    if args.update_config:
-        sys.exit(0)
+    ###################
+    # Set Working Directory
+    try:
+        work = args.working_dir
+        os.chdir(work)
+    except:
+        work = os.getcwd()
+        
+    # Set Sync
+    setattr(bacch, 'sync', args.sync)
+    
+    ###################
+    # Init Log Handler
+    if args.verbose:
+        log = bacch.VerboseLogHandler(args)
+    else:
+        log = bacch.QuietLogHandler(args)
+    setattr(bacch, 'log', log)
 
-    # Init Paths
-    paths = ['.bacch',
-        os.path.join('.bacch', 'tmp'),
-        os.path.join('.bacch', 'pickle')
-    ]
-    for i in paths:
-        mkdir(i)
+    ####################
+    # Starting Bacch
+    bacch.log.info('Starting Bacch')
+    bacch.log.debug('Working Directory: %s' % os.path.abspath(work))
+    bacch.log.debug('Log File: %s' % os.path.abspath(args.logfile))
 
-    # Init Log
-    log = bacch.log.Log(config)
-    log.info("Starting Bacch")
+    # Directory Structure
+    bacch.log.debug("Initializing Directory Structure")
+    configdir = '.bacch'
+    tmp = os.path.join(configdir, 'tmp')
+    pick = os.path.join(configdir, 'pickle')
+    dirs = [configdir, tmp, pick]
 
-    #########################
-    # Load Data
-    log.info("Initializing project read.")
-    path_pickle = os.path.join('.bacch', 'pickle', 'bacch.pickle')
-    data = bacch.project.load(config, log, path_pickle)
+    for i in dirs:
+        makedir(i)
 
-    #########################
-    # Exit Bacch
-    time_end = datetime.datetime.now()
-    time_diff = time_end - time_start
-    sec = round(time_diff.total_seconds(), 2)
-    msg = 'Operation completed in %s seconds' % sec
-    print(msg)
-    sys.exit(0)
+    # Data Handler
+    pickle_path = os.path.join(pick, 'bacch.pickle')
+    datahandler = bacch.load_data(pickle_path)
+
+    ###################
+    # Exit
+    exit(0)
+
+           
+    
+        
     
 

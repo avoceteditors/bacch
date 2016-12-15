@@ -8,9 +8,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Options
-    parser.add_argument('-c', '--config', default = 'book.json')
-    parser.add_argument('--update-config', action = 'store_true')
+    parser.add_argument('-k', '--working-dir', default = '.')
     parser.add_argument('-v', '--verbose', action = 'store_true')
+    parser.add_argument('-l', '--logfile', default = 'bacch.log')
     parser.add_argument('--debug', action = 'store_true')
 
     # Commands

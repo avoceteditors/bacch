@@ -10,7 +10,7 @@ lib = site.USER_SITE
 config = os.path.join(lib, 'bacch', 'config')
 
 setup(name = 'bacch',
-        version = '0.6',
+        version = '0.9',
         author = 'Kenneth P. J. Dyer',
         author_email = 'kenneth@avoceteditors.com',
         url = 'https://github.com/avoceteditors/bacch',
