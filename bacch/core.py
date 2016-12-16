@@ -87,6 +87,35 @@ def run(args):
     # Data Handler
     pickle_path = os.path.join(pick, 'bacch.pickle')
     datahandler = bacch.load_data(pickle_path)
+    
+    ###################
+    # Build Project
+    bacch.log.info("Initialize Builder")
+    builds = datahandler.builds
+    build_keys = datahandler.fetch_keys()
+
+    build_default = datahandler.build_default
+    build_call = args.build
+    if build_call is None:
+        call = build_default
+    else:
+        if build_call in builds:
+            call = build_call
+        elif build_call in build_keys:
+            call = '__FILEBUILD__'
+            builds[call]['target'] = build_call
+        else:
+            bacch.log.error("Invalid Build Call")
+            exit(1)
+
+    build = builds[call]
+    element = build['element']
+    
+    if element == "*" or element == '%':
+        builder = bacch.PageBuilder(build, datahandler)
+    else:
+        builder = bacch.BookBuilder(build, datahandler)
+
 
     ###################
     # Exit

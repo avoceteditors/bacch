@@ -52,6 +52,7 @@ class DataEntry():
         return self.sections
 
     
+
     #############################
     # Set Stats
     def set_stats(self):
@@ -87,3 +88,8 @@ class DataEntry():
 
     def fetch_stats(self):
         return self.stats
+
+    ###########################
+    # Fetch
+    def fetch(self):
+        return self.doctree

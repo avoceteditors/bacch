@@ -20,3 +20,4 @@ bacch.pyd
 bacch.py
 .README.rst.swp
 bacch.log
+*.swp

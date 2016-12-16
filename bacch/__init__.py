@@ -12,6 +12,7 @@ from .datahandler import DataHandler
 from .picklehandler import load_data, save_data
 from .xml import read_xml, fetch_element
 from .dataentry import DataEntry
+from .builders import PageBuilder, BookBuilder
 
 # XML Namespaces
 __xmlns__ = {

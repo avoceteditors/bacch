@@ -15,4 +15,4 @@ install-py2:
 	@$(PY2)
 
 testbacch:
-	@bacch -Svk test
+	@bacch -Svk test -b html
