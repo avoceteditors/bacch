@@ -113,8 +113,26 @@ def run(args):
     
     if element == "*" or element == '%':
         builder = bacch.PageBuilder(build, datahandler)
+        bacch.log.info('Page Builder: Ready')
     else:
         builder = bacch.BookBuilder(build, datahandler)
+        bacch.log.info('Book Builder: Ready')
+
+    # Writer
+    bacch.log.info('Initialize Writer')
+    writer_type = build['format']
+    if writer_type == 'html':
+        writer = bacch.HTMLWriter(build, builder, datahandler)
+        bacch.log.info('HTML Writer: Ready')
+    elif writer_type == 'latex':
+        writer = bacch.LATEXWriter(build, builder, datahandler)
+        bacch.log.info('LaTeX Writer: Ready')
+    else:
+        bacch.log.error("Invalid Writer Format: %s" % writer_type)
+        exit(1)
+
+    writer.parse()
+
 
 
     ###################
