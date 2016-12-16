@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="chap0102" version="5.0"
+		xmlns="http://docbook.org/ns/docbook"
+		xmlns:xi="http://www.w3.org/2001/XInclude"
+		xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<info>
+<title>Chapter 2: Formatting Tests</title>
+<titleabbrev>Chap II</titleabbrev>
+<abstract>
+<para>
+Chapter tests various formatting options.
+</para>
+</abstract>
+</info>
+
+<para>
+The purpose of this chapter is to test how Bacch renders inline formatting options.  In the list below, blank spaces after the colon indicate failed tests:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+Bold Test: <emphasis role="strong">bold</emphasis>
+</para>
+</listitem>
+
+<listitem>
+<para>
+Emphasis Test: <emphasis>italic</emphasis>
+</para>
+</listitem>
+
+<listitem>
+<para>
+Code Test: <code>code</code>
+</para>
+</listitem>
+
+</itemizedlist>
+</chapter>

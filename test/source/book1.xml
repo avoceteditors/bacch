@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<book id="book1-test" version="5.0"
+	xmlns="http://docbook.org/ns/docbook"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<info>
+<title>Bacch Testbook I: Multichapter Book Test</title>
+<titleabbrev>Bacch Testbook I</titleabbrev>
+</info>
+
+<!-- Chapters -->
+<bacch:include href="chap0101" />
+<bacch:include href="chap0102" />
+<bacch:include href="chap0103" />
+
+</book>

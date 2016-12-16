@@ -28,9 +28,12 @@ def makedir(path):
 def run(args):
 
     ###################
-    # Init Start Timer
+    # Init Bacch
     time_start = datetime.datetime.now()
     setattr(bacch, 'time_start', time_start)
+
+    # Store Args
+    setattr(bacch, 'args', args)
 
     ###################
     # Masthead

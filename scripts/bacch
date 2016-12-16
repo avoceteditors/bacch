@@ -11,7 +11,9 @@ if __name__ == '__main__':
     parser.add_argument('-k', '--working-dir', default = '.')
     parser.add_argument('-v', '--verbose', action = 'store_true')
     parser.add_argument('-l', '--logfile', default = 'bacch.log')
+    parser.add_argument('--master', default = 'master.xml')
     parser.add_argument('--debug', action = 'store_true')
+    parser.add_argument('--extension', default='xml')
 
     # Commands
     parser.add_argument('-S', '--sync', action = 'store_true')

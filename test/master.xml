@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bacch:project id="master" version="5.0"
+		xmlns="http://docbook.org/ns/docbook"
+		xmlns:xi="http://www.w3.org/2001/XInclude"
+		xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<info>
+<title>Bacch: Test Project</title>
+
+<abstract>
+<para>
+These pages provide a test environment for Bacch XML reandering.
+</para>
+</abstract>
+</info>
+
+<!-- ################ CONTENT ################## -->
+<bacch:content>
+<bacch:include href="book1" />
+</bacch:content>
+
+<bacch:config>
+
+<!-- #### Resource Directories #### -->
+<bacch:resources>
+<bacch:resource path="source" type="source"/>
+</bacch:resources>
+
+
+<!-- #### Build Configuration #### -->
+<bacch:builds output="output">
+<bacch:build id="html" path="html" element="*" format="html"/>
+<bacch:build id="latex" path="latex" element="book" format="latex"/>
+</bacch:builds>
+
+
+<!-- #### Block Configuration #### -->
+<bacch:blocks>
+<bacch:prompts>
+
+<!-- OrientDB Console -->
+<bacch:prompt id="orientdb">
+<bacch:ps id="PS1">orientdb&gt; </bacch:ps>
+<bacch:ps id="PS2">          </bacch:ps>
+</bacch:prompt>
+
+<!-- MySQL Client -->
+<bacch:prompt id="mysql">
+<bacch:ps id="PS1">mysql&gt; </bacch:ps>
+<bacch:ps id="PS2">    -&gt; </bacch:ps>
+</bacch:prompt>
+
+<!-- Shell Prompts -->
+<bacch:prompt id="sh-user">
+<bacch:ps id="PS1">$ </bacch:ps>
+<bacch:ps id="PS2">&gt;      </bacch:ps>
+</bacch:prompt>
+
+<bacch:prompt id="sh-root">
+<bacch:ps id="PS1"># </bacch:ps>
+<bacch:ps id="PS2">&gt;      </bacch:ps>
+</bacch:prompt>
+
+</bacch:prompts>
+
+</bacch:blocks>
+</bacch:config>
+
+</bacch:project>

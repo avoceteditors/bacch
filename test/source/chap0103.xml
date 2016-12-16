@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="chap0103" version="5.0"
+		xmlns="http://docbook.org/ns/docbook"
+		xmlns:xi="http://www.w3.org/2001/XInclude"
+		xmlns:bacch="http://avoceteditors.com/2016/bacch">
+<info>
+<title>Chapter 3: Block Tests</title>
+<titleabbrev>chap3</titleabbrev>
+
+<abstract>
+<para>
+Chapter tests block element rendering.
+</para>
+</abstract>
+</info>
+
+<para>
+The purpose of this chapter is to test various block-level rendering, such as code blocks and blockquotes.  Content that renders unexpectedly or blank in the section below indicate test failures.
+</para>
+
+<itemizedlist>
+<title>Code Blocks</title>
+
+<listitem>
+<para>
+Basic Code Block
+</para>
+
+<programlisting>
+content for basic code block, no formatting.
+</programlisting>
+
+</listitem>
+
+<listitem>
+<para>
+Code block with syntax highlighting.
+</para>
+
+<programlisting languague="sql">
+SELECT * FROM tab
+</programlisting>
+
+</listitem>
+
+<listitem>
+<para>
+Code Block with input and output, using the standard <code>&lt;prompt&gt;</code> element.
+</para>
+
+<programlisting>
+<prompt>$</prompt> 
+<userinput language="sh">
+cat test.txt
+</userinput>
+<computeroutput>stuff
+stuff
+morestuff</computeroutput>
+</programlisting>
+
+</listitem>
+
+<listitem>
+<para>
+Bacch supports variable prompts, allowing you to define PS1 and PS1 values and a system level.
+</para>
+
+<programlisting>
+<userinput language="sql" bacch:prompt="orientdb">
+SELECT FROM MyClass
+WHERE name = "id"
+</userinput>
+</programlisting>
+
+</listitem>
+
+<listitem>
+<para>
+Rendering tables such as MySQL output can prove a hassle.  Design goal for Bacch is to implement a handler to adjust table variables in <code>&lt;computeroutput&gt;</code>.
+</para>
+
+<programlisting>
+<userinput language="sql" bacch:prompt="mysql">
+SELECT * FROM my_table;
+</userinput>
+
+<computeroutput class="table">
++--+--+
+| Variable_name | Value |
++--+--+
+| wsrep_on | ON |
++---+---+
+</computeroutput>
+
+</programlisting>
+
+</listitem>
+
+
+<listitem>
+<para>
+Test for replaceable variables in <code>&lt;programlisting&gt;</code> blocks.
+</para>
+
+<programlisting>
+<userinput language="sql" bacch:prompt="sql">
+SELECT * FROM <replaceable>table</replaceable>;
+</userinput>
+</programlisting>
+
+</listitem>
+
+
+</itemizedlist>
+
+
+
+
+</chapter>
