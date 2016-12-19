@@ -5,6 +5,7 @@ class BaseWriter():
 
     def __init__(self, build, builder, datahandler):
         self.build = build
+        self.builder = build
         self.elements = builder.elements
         self.datahandler = datahandler
 
@@ -19,7 +20,7 @@ class BaseWriter():
 class HTMLWriter(BaseWriter):
 
     def init_subclass(self):
-        self.trans = bacch.HTMLTranslator(self.build, self.elements, self.datahandler)
+        self.trans = bacch.HTMLTranslator(self.build, self.builder, self.elements, self.datahandler)
 
 
 class LATEXWriter(BaseWriter):

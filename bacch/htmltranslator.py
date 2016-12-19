@@ -5,38 +5,90 @@ class HTMLTranslator(bacch.Translator):
     def init_subclass(self):
         self.prefix = 'html'
 
-    
+    # Page
+    def open_page(self, node):
+        header = ["<html>", "<head>"]
+
+        header.append('</head>')
+        header.append('<body>')
+
+        return '\n'.join(header)
+
+    def close_page(self, node):
+        footer = ['</body>', '</html>']
+        return '\n'.join(footer)
+   
     # Section Handlers
     def open_book_series(self, node):
-        pass
+        if node.page:
+            text = self.open_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def close_book_series(self, node):
-        pass
+        if node.page:
+            text = self.close_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def open_book_book(self, node):
         pass
+        if node.page:
+            text = self.open_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def close_book_book(self, node):
-        pass
+        if node.page:
+            text = self.close_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def open_book_part(self, node):
-        pass
+        if node.page:
+            text = self.open_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def close_book_part(self, node):
-        pass
+        if node.page:
+            text = self.close_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def open_book_chapter(self, node):
-        pass
+        if node.page:
+            text = self.open_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def close_book_chapter(self, node):
-        pass
+        if node.page:
+            text = self.close_page(node)
+            self.body.append(text)
+        else:
+            pass    
 
     def open_book_section(self, node):
-        pass
+        if node.page:
+            text = self.open_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     def close_book_section(self, node):
-        pass
-
+        if node.page:
+            text = self.close_page(node)
+            self.body.append(text)
+        else:
+            pass
 
     # Block Handlers
     def open_book_para(self, node):
@@ -60,4 +112,16 @@ class HTMLTranslator(bacch.Translator):
         pass
 
 
+    # Inline Elements
+    def open_book_emphasis(self, node):
+        pass
 
+    def close_book_emphasis(self, node):
+        pass
+
+    # Links
+    def open_book_link(self, node):
+        pass
+
+    def close_book_link(self, node):
+        pass    

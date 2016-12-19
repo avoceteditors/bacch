@@ -5,15 +5,22 @@ import bacch
 
 class Translator():
 
-    def __init__(self, build, elements, datahandler):
+    def __init__(self, build, build_type, elements, datahandler):
         self.build = build
+        self.build['type'] = build_type        
         self.elements = elements
         self.datahandler = datahandler
 
         self.init_subclass()
 
+        for element in self.elements:
+            element.attrib['page'] = 'yes'
+    
+
     def walkthrough(self):
+        self.body = []
         self.walk(self.elements)
+        #print(self.body)
 
     def walk(self, elements):
 
@@ -27,6 +34,8 @@ class Translator():
                         node = getattr(bacch.nodes, '%s_%s' % (name, tag))
                         node = node(element, self.datahandler)
 
+                        node.compile()
+
                         if node.readchildren:
                             node_start = self.fetch_handler(self, 
                                 'open_%s_%s' % (name, tag))
@@ -35,16 +44,26 @@ class Translator():
                             self.crawl(node, element, node_start, node_end)
 
                     except:
-                        bacch.log.warn("Node Handler: %s"  % tag)
+                        bacch.log.warn("Node Handler: bacch.nodes.%s_%s"  % (name, tag))
+                        print(element.attrib)
 
     def crawl(self, node, element, start, end):
-        print('yes')
         if start and end:
+            
+            # Text
+            self.add(element.text)            
 
             # Walk Elements
             self.walk(element)
 
+            # Tail
+            self.add(element.tail)
 
+
+    def add(self, text):
+        if not re.match('^[\s]*$', text):
+            text = re.sub('\n', '', text)
+            self.body.append(text)
                     
     def fetch_handler(self, obj, name):
         try: 
