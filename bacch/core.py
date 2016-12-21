@@ -133,6 +133,7 @@ def run(args):
 
     writer.parse()
 
+    writer.write()
 
 
     ###################

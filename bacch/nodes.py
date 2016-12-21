@@ -53,3 +53,27 @@ class book_itemizedlist(Node):
 
 class book_listitem(Node):
     pass
+
+
+# Inline Elements
+class book_link(Node):
+    def __init__(self, element, datahandler):
+        Node.__init__(self, element, datahandler)
+        self.readchildren = False
+
+
+class book_emphasis(Node):
+    pass
+
+class book_code(Node):
+    def __init__(self, element, datahandler):
+        Node.__init__(self, element, datahandler)
+        self.readchildren = False
+
+
+class book_programlisting(Node):
+    def __init__(self, element, datahandler):
+        Node.__init__(self, element, datahandler)
+        self.readchildren = False
+
+

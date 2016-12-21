@@ -1,5 +1,6 @@
 # Module Imports
 import bacch
+import os.path
 
 class BaseWriter():
 
@@ -14,7 +15,22 @@ class BaseWriter():
     def parse(self):
         translator = self.trans
         translator.walkthrough()
+        self.file_content = translator.fetch()
         
+    def write(self):
+        outputdir = self.build['path']
+        ext = self.build['format']
+        
+        for write in self.file_content:
+            path = os.path.join(outputdir, 
+            '%s.%s' % (write, ext))
+
+            text = self.file_content[write]
+            print(text) 
+
+        
+
+
 
 class HTMLWriter(BaseWriter):
 

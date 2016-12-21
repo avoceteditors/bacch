@@ -7,13 +7,34 @@ class Translator():
 
     def __init__(self, build, elements, datahandler):
         self.build = build
+        self.body = None
+        self.text = {}
+        self.name = ''
         self.elements = elements
         self.datahandler = datahandler
 
         self.init_subclass()
 
+    def fetch(self):
+        ret_text = []
+        for key in self.text:
+            body = ''.join(self.text[key])
+            head = self.open_document()
+            foot = self.close_document()
+            newtext = '\n\n'.join([head, body, foot])
+
+            self.text[key] = newtext
+
+        return self.text
+
     def walkthrough(self):
-        self.walk(self.elements)
+        
+        for element in self.elements:
+            if self.body is not None:
+                self.text[self.name] = self.body
+            self.name = element.attrib['id']
+            self.body = []
+            self.walk(element)
 
     def walk(self, elements):
 
@@ -38,7 +59,6 @@ class Translator():
                         bacch.log.warn("Node Handler: %s"  % tag)
 
     def crawl(self, node, element, start, end):
-        print('yes')
         if start and end:
 
             # Walk Elements
