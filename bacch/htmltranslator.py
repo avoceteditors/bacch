@@ -53,10 +53,10 @@ class HTMLTranslator(bacch.Translator):
 
     # Block Handlers
     def open_book_para(self, node):
-        pass
+        self.body.append('\n<p>')
 
     def close_book_para(self, node):
-        pass
+        self.body.append("</p>\n")
 
     def open_book_programlisting(self, node):
         pass
@@ -67,16 +67,16 @@ class HTMLTranslator(bacch.Translator):
 
     # List Handlers
     def open_book_itemizedlist(self, node):
-        pass
+        self.body.append('\n<ul>\n')
 
     def close_book_itemizedlist(self, node):
-        pass
+        self.body.append('\n</ul>\n')
 
     def open_book_listitem(self, node):
-        pass
+        self.body.append('<li>')
 
     def close_book_listitem(self, node):
-        pass
+        self.body.append('</li>')
 
 
     # Inline Handlers
@@ -93,9 +93,9 @@ class HTMLTranslator(bacch.Translator):
         pass
 
     def open_book_code(self, node):
-        pass
+        self.body.append('<code>')
 
     def close_book_code(self, node):
-        pass
+        self.body.append('</code>')
 
 
