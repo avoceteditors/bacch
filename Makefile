@@ -1,7 +1,7 @@
 
 
 SETUP = setup.py install --user
-PY3 = python3 $(SETUP) 
+PY3 = python3.5 $(SETUP) 
 PY2 = python2 $(SETUP)
 CALL = bacch
 
