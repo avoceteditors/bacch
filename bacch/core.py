@@ -1,3 +1,8 @@
+"""
+This module provides the core functions for Bacch,
+including the main `run()` and `exit()` processes.
+"""
+
 # Module Imports
 import datetime
 import sys
@@ -7,15 +12,42 @@ import bacch
 
 ###################
 # Exit Bacch
-def exit(exit_code):
+def exit(exit_code, stats = None):
+    """ This function provides the exit process.
+
+    It takes an exit code integer and a stats dictonary
+    as arguments.  If stats is not None and args.verbose
+    is True, it reports on operation stats.  Otherwise,
+    it prints the time it took to run then exits, passing
+    the exit code to sys.exit().
+    """
+
+    # Compile and Report Stats
+    msgs = []
+    if stats is not None and bacch.args.verbose:
+        files_read = 'Files:\t%s' % stats['files']
+        msgs.append(files_read)
+
+        print("\nStatistics")
+        for i in msgs:
+            print(' - %s' % i)
+
+    # Time Report
     time_end = datetime.datetime.now()
     time_diff = time_end - bacch.time_start
     sec = round(time_diff.total_seconds(), 2)
     close_msg = '\nOperation completed in %s seconds' % sec
     print(close_msg)
+
+    # Exit
     sys.exit(exit_code)
 
+###################
+# Create Directory 
 def makedir(path):
+    """ Creates a direcotry in the event that it does
+    not already exist.
+    """
     if not os.path.exists(path):
         os.mkdir(path)
     elif os.path.isfile(path):
@@ -26,6 +58,8 @@ def makedir(path):
 ###################
 # Main Process
 def run(args):
+    """ Function handles the main application process.
+    """
 
     ###################
     # Init Bacch
@@ -111,36 +145,19 @@ def run(args):
     build = builds[call]
     element = build['element']
     
-    if element == "*" or element == '%':
-        builder = bacch.PageBuilder(build, datahandler)
-        bacch.log.info('Page Builder: Ready')
-    else:
-        builder = bacch.BookBuilder(build, datahandler)
-        bacch.log.info('Book Builder: Ready')
-
-    # Writer
-    bacch.log.info('Initialize Writer')
-    writer_type = build['format']
-    if writer_type == 'html':
-        writer = bacch.HTMLWriter(build, builder, datahandler)
-        bacch.log.info('HTML Writer: Ready')
-    elif writer_type == 'latex':
-        writer = bacch.LATEXWriter(build, builder, datahandler)
-        bacch.log.info('LaTeX Writer: Ready')
-    else:
-        bacch.log.error("Invalid Writer Format: %s" % writer_type)
-        exit(1)
-
-    writer.parse()
 
 
 
     ###################
     # Exit
-    exit(0)
 
-           
+    # Init Exit Stats
+    stats = {
+        "files": len(datahandler.fetch())
+    }
+ 
+    # Save Data Handler
+    bacch.save_data(pickle_path, datahandler)
     
-        
-    
-
+    # Run Exit
+    exit(0, stats)
