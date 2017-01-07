@@ -1,11 +1,19 @@
+"""
+Provides a project level handler for file data.
+"""
+
 # Module Imports
 import os
 import re
 import bacch
 
+###################
 # Data Handler
 class DataHandler():
+    """ Project level handler for file data.
+    """
 
+    # Initialize Class
     def __init__(self):
 
         ######################
@@ -67,8 +75,10 @@ class DataHandler():
         self.project = {} 
         self.read_files()
 
-        
+    # Read Project
     def read_files(self):
+        """ Method reads files from source directories.
+        """
         sourcepath = self.resources['source']
         ext = '\.%s$' % bacch.args.extension
         base = os.listdir(sourcepath)
@@ -85,7 +95,9 @@ class DataHandler():
                 self.read(path, name)
 
 
+    # Read Individual File
     def read(self, path, name = None, passable = True):
+        """ Method reads XML files into lxml data objects."""
         xml = bacch.read_xml(path)
         if xml is None:
             bacch.log.critical("Unable to read %s" % path)
@@ -97,14 +109,18 @@ class DataHandler():
             self.project[name] = bacch.DataEntry(name, path, xml)
 
 
+    # Determine if Sync Required
     def sync(self):
         return bacch.args.sync
 
+    # Reread Files
     def update(self):
         self.read_files()
 
+    # Fetch Project
     def fetch(self):
         return self.project
 
+    # Fetch Project Keys
     def fetch_keys(self):
         return self.project.keys()
