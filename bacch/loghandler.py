@@ -1,19 +1,20 @@
 # Module Imports
 import logging
+import bacch
 
 # Log Handler
 class LogHandler():
 
-    def __init__(self, args):
+    def __init__(self):
         
         # Initialize Logging Level
-        if args.debug:
+        if bacch.__args__.debug:
             loglevel = logging.DEBUG
         else:
             loglevel = logging.INFO
 
         # Set Logfile Path
-        logfile = args.logfile
+        logfile = bacch.__args__.logfile
 
         logging.basicConfig(
             filename = logfile,
