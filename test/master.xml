@@ -22,14 +22,14 @@ These pages provide a test environment for Bacch XML reandering.
 
 <!-- #### Resource Directories #### -->
 <bacch:resources>
-<bacch:resource path="source" type="source"/>
+<bacch:resource name="source" path="source" type="source"/>
 </bacch:resources>
 
 
 <!-- #### Build Configuration #### -->
 <bacch:builds output="output">
-<bacch:build id="html" path="html" element="*" format="html"/>
-<bacch:build id="latex" path="latex" element="book" format="latex"/>
+<bacch:build name="html" path="html" element="*" format="html"/>
+<bacch:build name="latex" path="latex" element="book" format="latex"/>
 </bacch:builds>
 
 

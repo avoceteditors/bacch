@@ -6,6 +6,7 @@ This module provides the main processes and core functionality for Bacch.
 import datetime
 import sys
 import os
+import pickle
 import bacch
 
 ##########################################
@@ -19,11 +20,11 @@ def exit(exit_code = 0):
     """
 
     # Log Time
-    bacch.log.debug("Calculating runtime duration...")
+    bacch.__log__.debug("Calculating runtime duration...")
     time_end = datetime.datetime.now()
-    time_diff = time_end - bacch.time_start
+    time_diff = time_end - bacch._time_start
     sec = round(time_diff.total_seconds(), 2)
-    bacch.log.debug("Done")
+    bacch.__log__.debug("Done")
     msg = "\nOperation completed in %s seconds" % sec
     print(msg)
 
@@ -37,17 +38,87 @@ def makedir(path):
     If the path does not exist already, it creates it for
     you."""
 
-    bacch.log.debug("Checking Path: %s" % path)
+    bacch.__log__.debug("Checking Path: %s" % path)
     if not os.path.exists(path):
-        bacch.log.debug("Path does not exist, creating...")
+        bacch.__log__.debug("Path does not exist, creating...")
         os.mkdir(path)
-        bacch.log.debug("Done")
+        bacch.__log__.debug("Done")
     elif os.path.isfile(path):
-        bacch.log.critical("Invalid Directory Path: %s" % path)
+        bacch.__log__.critical("Invalid Directory Path: %s" 
+            % path)
         sys.exit(1)
     else:
-        bacch.log.debug("Path Found.")
+        bacch.__log__.debug("Path Found.")
 
+##########################################
+# Pickle Handlers
+
+# Load Saved Data
+def load_data(path):
+    """ This function returns bacch.reader.Reader() class.
+
+    When Bacch closes, it saves a pickle of this class in
+    .bacch/pickle/bacch.pickle.  If this file does not
+    exist, or if Bacch is run with the --force argument,
+    it creates a new instance of the class and returns it.
+
+    If the file does exist, it loads the object and calls
+    the update() method if it was run with the --sync
+    argument.
+
+    If it encounters an error while loading the pickle or
+    if it successfully loads the pickle and finds that
+    the stored version of master.xml is older than the
+    one in the file, it creates and returns a fresh
+    instance of the Reader() class.
+    """
+    bacch.__log__.info("Searching for Saved Read...")
+
+    # Check that Pickle Exists
+    if os.path.exists(path) and not bacch.__args__.force:
+        
+        try:
+            # Open Pickle File 
+            f = open(path, 'rb')
+            reader = pickle.load(f)
+            f.close()
+        except:
+            msg = [
+                'Bacch encountered an error while loading',
+                'the saved read from the last time it ran.',
+                'Creating a new read object.']
+            msg = ' '.join(msg)
+            bacch.__log__.debug(msg)
+            return bacch.Reader()
+
+        # Sync Reader
+        if reader.master_updated():
+            return bacch.Reader()
+        elif bacch.__args__.sync: 
+            bacch.__log__.info("Updating File Reads...")
+            reader.update()
+            bacch.__log__.debug("Reads updated.")
+
+        return reader
+        
+    # Create New Reader Object
+    else:
+        bacch.__log__.debug("No Saved Data Found, building...")
+        return bacch.Reader()
+
+# Save Pickled Data
+def save_data(path, data):
+    """ This method saves bacch.reader.Reader() for later use.
+    """
+    bacch.__log__.info("Saving Data...")
+
+    try:
+        # Dump Data to File
+        f = open(path, 'wb')
+        pickle.dump(data, f)
+        f.close()
+    except:
+        bacch.__log__.warn("Error encountered while saving reader to file.")
 
 ##########################################
 # Main Process
@@ -57,7 +128,7 @@ def run(args):
     ######################
     # Initialize Bacch
     time_start = datetime.datetime.now()
-    setattr(bacch, 'time_sart', time_start)
+    setattr(bacch, '_time_start', time_start)
 
     # Store Arguments
     setattr(bacch, '__args__', args) 
@@ -68,7 +139,7 @@ def run(args):
         content = [
             '%s - %s' % (bacch.__name__, bacch.__slogan__),
             bacch.__author__,
-            bacch.__email__,
+            bacch.__author_email__,
             'Version %s' % bacch.__version__,'']
         masthead = '\n  '.join(content)
     else:
@@ -98,11 +169,12 @@ def run(args):
     bacch.__log__.debug('Working Directory: %s'
         % os.path.abspath(work))
     bacch.__log__.debug('Log File: %s'
-        % os.path.abspath(bacch.__args__.logfile)
+        % os.path.abspath(bacch.__args__.logfile))
 
     # Initialize Directory Structure
     bacch.__log__.debug('Initialize Directory Structure...')
-    configdir = '.bacch'
+    configdir = os.path.join(
+        os.getcwd(), '.bacch')
     tmp     = os.path.join(configdir, 'tmp')
     pickle  = os.path.join(configdir, 'pickle')
 
@@ -113,12 +185,14 @@ def run(args):
     ######################
     # Reader Processes
     picklepath = os.path.join(pickle, 'bacch.pickle')
-    bacch.__args__._picklepath = picklepath
-    reader = bacch.reader()
+    reader = load_data(picklepath) 
 
     ######################
     # Exit Process
 
+    # Save Data
+    print(picklepath)
+    save_data(picklepath, reader)
     # Close Bacch
     exit()
 
