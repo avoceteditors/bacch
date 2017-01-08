@@ -12,9 +12,10 @@ from .core import run, exit
 from .loghandler import VerboseLogHandler, QuietLogHandler
 from .reader import Reader
 from .filehandlers import xmlHandler, fetch_element
+from .dataentry import DataEntry
+
 #from .picklehandler import load_data, save_data
 #from .xml import read_xml, fetch_element
-#from .dataentry import DataEntry
 #from .builders import PageBuilder, BookBuilder
 #from .writers import HTMLWriter, LATEXWriter
 #from . import nodes

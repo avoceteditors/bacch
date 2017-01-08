@@ -37,3 +37,23 @@ def xmlHandler(path):
     f.close()
 
     return fetch_doctree(content)
+
+# Read Markdown
+def mdHandler(path):
+    """ This function provides a general handler for
+    converting Markdown files to DocBook XML, then
+    parsing into lxml objects."""
+
+    bacch.__log__.warning("Markdown parsing not supported for %s" % path)
+    raise ValueError("Bacch cannot yet parse Markdown")
+
+
+# Read reStructuredText 
+def rstHandler(path):
+    """ This function provides a general handler for
+    converting reStructuredText files to DocBook XML,
+    then parsing into lxml objects."""
+
+    bacch.__log__.warning("RST parsing not supported for %s" % path)
+    raise ValueError("Bacch cannot yet parse RST")
+

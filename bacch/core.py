@@ -191,8 +191,8 @@ def run(args):
     # Exit Process
 
     # Save Data
-    print(picklepath)
     save_data(picklepath, reader)
+
     # Close Bacch
     exit()
 

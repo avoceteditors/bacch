@@ -29,7 +29,9 @@ class Reader():
             bacch.__log__.critical("Error Parsing master.xml")
             bacch.exit(1)
 
-
+        # Read Source
+        self.data = {}
+        self.update()
 
     # Read File
     def read(self, path, getMaster = False):
@@ -72,10 +74,11 @@ class Reader():
             attr = i.attrib
             try:
                 name = attr['name']
-                self.resource[name] = self.build_dict(
+                self.resources[name] = self.build_dict(
                     attr, rdict)
             except:
                 pass
+
 
         # Build Configuration
         base_builds = bacch.fetch_element(master,
@@ -91,8 +94,20 @@ class Reader():
             attr = i.attrib
             try:
                 name = attr['name']
-                self.builds[name] = self.build_dict(
-                    attr, bdict)
+                self.builds[name] = self.build_dict(attr, bdict)
+            except:
+                pass
+
+        # Reader Configuration
+        base_readers = bacch.fetch_element(master,
+            '%s/bacch:readers/bacch:reader' % configxpath)
+        rdict = {'extension': 'xml'}
+        self.readers = {}
+        for i in base_readers:
+            attr = i.attrib
+            try:
+                name = attr['name']
+                self.readers[name] = self.build_dict(attr, rdict)
             except:
                 pass
                 
@@ -105,7 +120,7 @@ class Reader():
         ret_dict = {}
         
         # Loop Target Dict 
-        for key,value in targets:
+        for key in targets:
 
             # Set Configuration Value
             try:
@@ -113,8 +128,74 @@ class Reader():
 
             # Set Default Value
             except:
-                ret_dict[key] = value
+                ret_dict[key] = targets[key] 
+
         return ret_dict
              
 
+    # Update Reads
+    def update(self):
+        """ This method controls the file read process, building
+        a list of relevant files and starting the read."""
 
+        # Set Base Directory
+        base_path = os.path.abspath(os.getcwd())
+       
+        # Generate Extension Listings 
+        exts = ['.xml', '.md']
+
+        # Process Resources
+        for key in self.resources:
+            config = self.resources[key]
+            if config['type'] in ['source', 'blocks']:
+                sourcepath = os.path.join(base_path, config['path'])
+                base = os.listdir(sourcepath)
+
+                # Initialize Key in self.data
+                if key not in self.data:
+                    self.data[key] = {}
+                
+                # Iterate over Files in Directory
+                for i in base:
+                    self.process_file(i, sourcepath)
+
+    # Process File Instance
+    def process_file(self, filename, sourcepath):
+        """ This method provides processing for individual files
+        in a given resource.  For each file, it tests whether the
+        file is one that it knows how to handle then checks if it
+        has an old read available.  If it doesn't have an old read
+        or if it does and finds that read out of date, it generates
+        a new instances of the bacch.DataEntry() class.  """
+
+        split = os.path.splitext(filename)
+        name = split[0]
+        ext = split[1]
+
+        # Match Files to Parse
+        if ext in ['.xml']:
+
+            # Set Path
+            path = os.path.join(sourcepath, filename)
+
+            # Try Reading from Data
+            try:
+                entry = self.data[key][name]
+
+                if bacch.__args__.sync:
+                    mtime = os.getmtime(path)
+                    if entry.check_mtime(mtime):
+                        self.init_dataentry(key, name, path)
+
+            # Create New Entry
+            except:
+                self.init_dataentry(key, name, path)
+
+    # Init Data Entry
+    def init_dataentry(self, key, name, path):
+        """ This helper method parses the given path into
+        an lxml doctree, it then initializes a bacch.DataEntry()
+        class instance, which it adds to self.data."""  
+
+        data = self.read(path)
+        self.data[key][name] = bacch.DataEntry(name, path, data)
