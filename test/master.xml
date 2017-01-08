@@ -32,6 +32,11 @@ These pages provide a test environment for Bacch XML reandering.
 <bacch:build name="latex" path="latex" element="book" format="latex"/>
 </bacch:builds>
 
+<!-- #### Reader Matches #### -->
+<bacch:readers>
+<bacch:reader name="xml" extension="docbook"/>
+<bacch:reader name="md" extesnion="markdown"/>
+</bacch:readers>
 
 <!-- #### Block Configuration #### -->
 <bacch:blocks>

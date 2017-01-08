@@ -157,10 +157,10 @@ class Reader():
                 
                 # Iterate over Files in Directory
                 for i in base:
-                    self.process_file(i, sourcepath)
+                    self.process_file(key, i, sourcepath)
 
     # Process File Instance
-    def process_file(self, filename, sourcepath):
+    def process_file(self, key, filename, sourcepath):
         """ This method provides processing for individual files
         in a given resource.  For each file, it tests whether the
         file is one that it knows how to handle then checks if it
@@ -183,8 +183,7 @@ class Reader():
                 entry = self.data[key][name]
 
                 if bacch.__args__.sync:
-                    mtime = os.getmtime(path)
-                    if entry.check_mtime(mtime):
+                    if entry.check_mtime():
                         self.init_dataentry(key, name, path)
 
             # Create New Entry
