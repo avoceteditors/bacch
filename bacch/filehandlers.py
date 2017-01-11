@@ -5,6 +5,7 @@ the lxml module to generate a doctree."""
 
 # Module Imports
 import lxml.etree
+import pypandoc
 import bacch
 
 # Fetch Element
@@ -38,6 +39,29 @@ def xmlHandler(path):
 
     return fetch_doctree(content)
 
+# Call Pandoc
+def pandocHandler(path, target):
+    """ This function provides a generic handler for
+    Pypandoc calls, (given that these are generic for
+    reStructuredText and Markdown."""
+    
+    # Set Arugments for Pandoc
+    pdoc_args = [
+        '--top-level-division=chapter'
+    ]
+
+    # Parse File to XML
+    xml = pypandoc.convert_file(
+        source = path,
+        to = 'docbook5',
+        format=target,
+        encoding = 'utf-8',
+        extra_args = pdoc_args)
+
+    # Fetch Doctree
+    doctree = fetch_doctree(xml)
+    
+
 # Read Markdown
 def mdHandler(path):
     """ This function provides a general handler for
@@ -56,4 +80,3 @@ def rstHandler(path):
 
     bacch.__log__.warning("RST parsing not supported for %s" % path)
     raise ValueError("Bacch cannot yet parse RST")
-
