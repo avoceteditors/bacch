@@ -188,6 +188,10 @@ def run(args):
     reader = load_data(picklepath) 
 
     ######################
+    # Processing Handlers
+    build = bacch.processingHandlers(reader) 
+
+    ######################
     # Exit Process
 
     # Save Data

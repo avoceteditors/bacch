@@ -159,6 +159,9 @@ class Reader():
                 for i in base:
                     self.process_file(key, i, sourcepath)
 
+        # Set Section Data
+        self.set_sects()
+
     # Process File Instance
     def process_file(self, key, filename, sourcepath):
         """ This method provides processing for individual files
@@ -198,3 +201,35 @@ class Reader():
 
         data = self.read(path)
         self.data[key][name] = bacch.DataEntry(name, path, data)
+
+    # Retrieve Data
+    def fetch(self):
+        """ This method retrieves read data from the class."""
+        return self.data
+
+    # Set Sectional Data
+    def set_sects(self):
+        """ This method sets sectional data for the class by
+        retrieving each from each file read DataEntry() class.
+        """
+        self.sect_data = {}
+
+        for resource in self.data:
+            self.sect_data[resource] = {}
+
+            for i in self.data[resource]:
+                element = self.data[resource][i]
+
+                sects = element.fetch_sects()
+                for sect in sects:
+                    entry = sects[sect]
+                    entry['href'] = i
+                    self.sect_data[resource][sect] = entry
+    
+
+    # Retrieve Sectional Data
+    def fetch_sects(self):
+        """ This method retrieves sectional data for the given
+        files.  This is passed in the form of a dict that contains
+        each resource and every section idref in the resource."""
+        return self.sect_data 
