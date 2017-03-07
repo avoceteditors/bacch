@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.5
 import argparse
-import bacch
+from bacch import run
 
 # Main Process
 if __name__ == '__main__':
@@ -10,15 +10,7 @@ if __name__ == '__main__':
     # Options
     parser.add_argument('-k', '--working-dir', default = '.')
     parser.add_argument('-v', '--verbose', action = 'store_true')
-    parser.add_argument('-l', '--logfile', default = 'bacch.log')
-    parser.add_argument('--master', default = 'master.xml')
-    parser.add_argument('--debug', action = 'store_true')
-    parser.add_argument('--extension', default='xml')
     parser.add_argument('-b', '--build')
 
-    # Commands
-    parser.add_argument('-S', '--sync', action = 'store_true')
-    parser.add_argument('-u', '--update', action = 'store_true')
-
     args = parser.parse_args()
-    bacch.run(args)
+    run(args)

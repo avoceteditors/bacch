@@ -6,7 +6,6 @@ PY2 = python2 $(SETUP)
 CALL = bacch
 
 
-all: install-py3 call
 
 install-py3:
 	@$(PY3)
@@ -14,5 +13,7 @@ install-py3:
 install-py2:
 	@$(PY2)
 
-testbacch:
-	@bacch -Svk test -b html
+call:
+	@echo ""
+	@echo ""
+	@bacch -v
