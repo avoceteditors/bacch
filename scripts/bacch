@@ -11,6 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', '--working-dir', default = '.')
     parser.add_argument('-v', '--verbose', action = 'store_true')
     parser.add_argument('-b', '--build')
+    parser.add_argument('-o', '--output', default='build')
 
     args = parser.parse_args()
     run(args)

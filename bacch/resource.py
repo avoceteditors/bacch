@@ -24,20 +24,30 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 from os import listdir
 from os.path import join, splitext
+from lxml.etree import _Comment
 from re import match
 
+# Local Imports
 from .filedata import FileData
+from . import xml
 
 # Logger
 from logging import getLogger
 logger = getLogger()
 
-class Resource():
 
+##########################################
+# Resource Class
+class Resource():
+    """ This class controls procssing on project resources.
+    """
+
+    # Initialize Class
     def __init__(self, name, path, lang, typ):
+        """ This method initializes the resource class.
+        """
         logger.info("Initializing Resource: %s" % name)
 
         # Set Variables
@@ -68,7 +78,78 @@ class Resource():
                 else:
                     logger.warning("Invalid File: %s" % filepath)
 
+    # Print Method
     def __repr__(self):
+        """ This method controls the class representation in
+        print statements.
+        """
         return "<class Resource name='%s' path='%s' lang='%s' type='%s'>" % (
                 self.name, self.path, self.lang, self.typ)
+
+
+    # Fetch Sectional Data
+    def fetch_sectdata(self):
+        return self.sectdata
+
+    # Find Target
+    def find_target(self, target):
+        return target in self.data
+
+    # Compile Doctree
+    def compile(self, resources, target):
+
+        # Store Resources
+        self.resources = resources        
+
+        # Fetch Doctree
+        logger.debug("Retrieving Doctree")
+        doctree = self.data[target].fetch_doctree()
+        
+        # Parse Doctree
+        logger.debug("Parsing Doctree for Includes")
+        doctree = self.parse(doctree, self.name)
+
+        # Return Doctree
+        return doctree
+
+    # Parse for Includes
+    def parse(self, doctree, key):
+
+        for element in doctree.iterchildren():
+
+            # Remove Comments
+            if isinstance(element, _Comment):
+                doctree.remove(element)
+
+            # Compile bacch:include Statements
+            elif element.tag == "{%s}include" % xml.fetch_xmlns("bacch"):
+                attr = element.attrib
+                try:
+                    # Fetch href
+                    href = attr['href']
+                    
+                    # Fetch Resource Key
+                    try:
+                        rkey = attr["resource"]
+                    except:
+                        rkey = key
+
+                    # Fetch Subdoctree
+                    subdoctree = self.resources[rkey].data[href].fetch_doctree()
+                    
+                    # Parse Subdoctree
+                    doctree.replace(element, self.parse(subdoctree, rkey))
+
+                except:
+                    logger.warning("Issue parsing bacch:include statement")
+
+            # Parse Subtree
+            else:
+                doctree.replace(element, self.parse(element, key))
+
+        return doctree
+
+
+
+
 

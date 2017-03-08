@@ -31,7 +31,9 @@ from sys import exit as sys_exit
 from os import chdir, getcwd
 from os.path import exists, isdir
 
+# Local Imports
 from .project import Project
+from .process import control
 
 # Global Variables
 logger = None
@@ -116,7 +118,6 @@ def run_masthead(verbose):
     # Set Level
     logger.setLevel(level)
 
-
 ########################################
 # Main Process
 def run(args):
@@ -141,6 +142,15 @@ def run(args):
 
     # Initialize Project
     project = Project()
+
+    # Initialize Build Target
+    logger.info("Finding build target")
+    target = project.build_target(args.build)
+    logger.debug("Build Target: %s" % str(target))
+
+    # Begin Document Processing
+    logger.info("Processing Document")
+    text = control(project, target)
 
     # Exit
     exit(0)

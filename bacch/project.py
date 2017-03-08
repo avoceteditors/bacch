@@ -24,17 +24,16 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
-
-from logging import getLogger
 from os.path import exists, isfile, isdir, join
 from os import getcwd
 
+# Local Imports
 from . import core
 from . import xml
 from .resource import Resource
 
 # Initialize Logger
+from logging import getLogger
 logger = getLogger()
 
 
@@ -44,6 +43,7 @@ class Project():
 
     title = "Untitled"
     slogan = None
+    default_build = None
 
     # Initialize Class
     def __init__(self):
@@ -63,6 +63,12 @@ class Project():
 
         # Load Project Resources
         self.load_resources(doctree)
+
+        # Load Sectional Data
+        self.load_sectdata()
+
+        # Ready
+        logger.debug("Project Ready")
 
     
     # Representation
@@ -97,7 +103,7 @@ class Project():
         if not len(resources) > 0:
             logger.critical("Unable to locate project resources")
             core.exit(1)
-
+        
         for resource in resources:
             attr = resource.attrib
             try:
@@ -109,11 +115,60 @@ class Project():
                 except:
                     lang = "en"
 
+                # Set Default Build
+                if typ == "source" or typ == "src":
+                    self.default_build = name
+
+                if exists(path) and isdir(path):
+                    # Initialize Resource
+                    self.resources[name] = Resource(name, path, lang, typ)
+
             except:
-                pass
+                logger.warning("Document Parse Failed: %s" % name)
 
-            if exists(path) and isdir(path):
-                # Initialize Resource
-                self.resources[name] = Resource(name, path, lang, typ)
+    # Retrieve Sectional Data
+    def load_sectdata(self):
+        self.sectdata = {}
+        for key, resource in self.resources.items():
+            
+            # Fetch Resource Data
+            self.sectdata[key] = resource.fetch_sectdata()
 
 
+    # Retrieve Build Target
+    def build_target(self, build):
+
+        # Initialize Target
+        target = ()
+
+        if build is None and self.default_build is None:
+            logger.critical("Unable to identify build target")
+            core.exit(1)
+
+        else:
+
+            # Find Target
+            for key, resource in self.resources.items():
+
+                if resource.find_target(build):
+                    return (key, build)
+
+            # Build Default 
+            if target == (): 
+                logger.critical("Need support for default builds")
+                core.exit(1)
+
+
+    # Compile Doctree
+    def compile(self, build):
+        key = build[0]
+        target = build[1]
+
+        # Load Resource
+        resource = self.resources[key]
+
+        # Compile Doctree
+        doctree = resource.compile(self.resources, target)
+
+        # Return Doctree
+        return doctree

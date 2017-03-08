@@ -24,61 +24,31 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import lxml.etree
 
+
+# Initialize Logger
 from logging import getLogger
 logger = getLogger()
 
-# Global Namespace Variables
-xmlns = {
-    "book": "http://docbook.org/ns/docbook",
-    "bacch": "http://avoceteditors.com/2016/bacch",
-    "dion": "http://avoceteditors.com/2016/dion",
-    "xi": "http://www.w3c.org/2001/XInclude"}
-rxmlns = {value:key for key, value in xmlns.items()}
 
-# Fetch XMLNS
-def fetch_xmlns(target=None):
 
-    try:
-        return xmlns[target]
-    except:
-        xmlns[target]
+###########################################
+# Document Processor Control
+def control(project, build):
+    """ This function controls the document processors
+    """
 
-# Fetch Reveresed XMLNS
+    # Initialize Text
+    text = None
 
-def fetch_rxmlns(target=None):
-    try:
-        return rxmlns[target]
-    except:
-        return rxmlns
+    # Fetch Doctree from Project
+    doctree = project.compile(build)
 
-# Read File Content
-def read_xml(path):
-    logger.info("Reading File: %s" % path)
+    # Initial Parse for links and prompt text
 
-    try:
-        logger.debug("Opening File")
-        # Open Path
-        f = open(path, 'rb')
-        content = f.read()
-        f.close()
+    # Medial Parse to convert to LaTeX
 
-        # Read XML
-        logger.debug("Parsing XML")
-        try:
-            doctree = lxml.etree.fromstring(content)
-        except:
-            logger.warning("Error Parsing XML")
-            doctree = None
+    # Terminal parse to render template
 
-    except:
-        logger.warning("Reader Failed to Open: %s" % path)
-        doctree = None
-
-    return doctree
-
-# XPath Query
-def fetch_xpath(doctree, xpath):
-
-    return doctree.xpath(xpath, namespaces=xmlns)
+    # Return Text
+    return text

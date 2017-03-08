@@ -38,6 +38,9 @@ class FileData():
 
         # Load Doctree
         logger.info("Initializing File Data: %s" % name)
+        self.path = path
+        self.name = name
+
         self.doctree = xml.read_xml(path)
         if self.doctree is None:
             self.valid = False
@@ -73,10 +76,15 @@ class FileData():
             # Save Data
             self.sectdata[idref] = {
                     "title": title,
-                    "format": title_format
+                    "format": title_format,
+                    "filename": self.name
                 }
 
-
+    # Fetch Sectional Data
     def fetch_sectdata(self):
         return self.sectdata
+
+    # Fetch Doctree
+    def fetch_doctree(self):
+        return self.doctree
 
