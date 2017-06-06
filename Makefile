@@ -1,19 +1,18 @@
 
 
 SETUP = setup.py install --user
-PY3 = python3.5 $(SETUP) 
-PY2 = python2 $(SETUP)
+PY3 = python3 $(SETUP) 
 CALL = bacch
+SRC = test/source
+OUT = test/build
 
 
-
-install-py3:
+install:
 	@$(PY3)
-	
-install-py2:
-	@$(PY2)
+
+all: install call
 
 call:
 	@echo ""
 	@echo ""
-	@bacch -v
+	@sphinx-build -b bacch $(SRC) $(OUT)
