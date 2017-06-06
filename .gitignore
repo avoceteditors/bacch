@@ -21,3 +21,4 @@ bacch.py
 .README.rst.swp
 bacch.log
 *.swp
+test/.bacch
