@@ -38,7 +38,7 @@ from .bookwriter import BookWriter
 class BookBuilder(Builder):
     """ Subclass used in generating LaTeX documents
     formatted for book publication. """
-    name = 'bacch'
+    name = 'bacch0'
 
 
     # Prepare Writing

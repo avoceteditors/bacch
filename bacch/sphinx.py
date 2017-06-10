@@ -25,7 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from .bookbuilder import BookBuilder
+from .builders import BacchBuilder, GnomonBuilder
 
 
 #########################################
@@ -34,8 +34,8 @@ def setup(app):
     """ Functions sets up the Sphinx extensions for Bacch """
 
     # Builders
-    app.add_builder(BookBuilder)
-    
+    app.add_builder(BacchBuilder)
+    app.add_builder(GnomonBuilder)
 
     #########################
     # Configuration
@@ -51,6 +51,8 @@ def setup(app):
             ('bacch_master_override', None, ''),
             ('bacch_pdfbuild', None, ''),
             ('bacch_pdfbuild_options', None, []),
+            ('bacch_use_parts', False, False),
+            ('gnomon_use_parts', False, False),
 
             # Document Configuration
             ('bacch_options', None, []),
@@ -66,11 +68,20 @@ def setup(app):
             ('bacch_showtitlelist_format', {}, show_titleformat),
             ('gnomon_showtitlelist_format', {}, show_titleformat),
 
+            ('bacch_noindent', False, False),
+            ('gnomon_noindent', False, False),
+            ('bacch_lettrine', False, False),
+            ('bacch_lettrine_conf', {}, {}),
+
+            ('bacch_numbers', False, False),
+            ('gnomon_numbers', False, False),
+            ('bacch_pdf', False, False),
+
             # Formatting
             ('bacch_titlepage', None, ''),
             ('gnomon_titlepage', None, ''),
-            ('bacch_toc', False, False),
-            ('gnomon_toc', False, False),
+            ('bacch_tocpage', False, False),
+            ('gnomon_tocpage', False, False),
     ]
 
     for (var, default, rebuild) in configs:

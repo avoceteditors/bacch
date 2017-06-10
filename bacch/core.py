@@ -127,7 +127,7 @@ active_nodes = [
     ('thead', 'skip'),
     ('title', 'skip'),
     ('title_reference', 'skip'),
-    ('toctree','skip'),
+    #('toctree','skip'),
     ('todo','pass'),
     ('topic', 'skip'),
     ('transition', 'skip'),
