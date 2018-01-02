@@ -268,3 +268,22 @@ class LaTeXTranslator(NodeVisitor):
 
     def depart_emphasis(self, node):
         self.body.append('}')
+
+    def visit_literal_inline(self, node):
+        self.body.append('\\texsc{')
+
+    def depart_literal_inline(self, node):
+        self.body.append('}')
+
+
+    def visit_literal_emphasis(self, node):
+        self.body.append('\\texsc{')
+
+    def depart_literal_emphasis(self, node):
+        self.body.append('}')
+
+    def visit_literal(self, node):
+        self.body.append("Lit:")
+
+    def depart_literal(self, node):
+        self.body.append("}")
