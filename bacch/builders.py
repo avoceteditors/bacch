@@ -32,7 +32,7 @@ from sphinx.util.console import darkgreen, bold
 from sphinx.util.osutil import ensuredir
 from sphinx.application import TemplateBridge
 
-from os.path import join, exists, dirname
+from os.path import join, exists, dirname, basename
 from shutil import copyfile
 from .writer import LaTeXWriter
 
@@ -58,7 +58,7 @@ class BaseBuilder(Builder):
                 break
 
         # Prepare Writer
-        self.writer = LaTeXWriter(self.config, self.name, template)
+        self.writer = LaTeXWriter(self.config, self.name, template, self)
 
         # Prepare Output Directory
         self.outtmp = join(self.outdir, 'tmp')
@@ -96,9 +96,11 @@ class BaseBuilder(Builder):
             doctree = self.assemble_doctree(master)
             self.info("Done")
 
+
             # Write Document
             self.info("Writing Document: %s" % master, nonl=True)
-            self.write_doc(master, doctree)
+            base = basename(master)
+            self.write_doc(base, doctree)
             self.info("Done")
 
     # Write Document
@@ -176,9 +178,14 @@ class GnomonBuilder(BaseBuilder):
 
     name = 'gnomon'
 
+    def init(self):
+        self.outdir_pdf = self.outdir
+
+    def get_outdated_docs(self):
+        return 'all documents'
+
     # Run Local Preparations
     def local_prep(self, docnmaes):
 
         # Set Temporary master
-        self.masters = self.config.bacch_masters
-        print("\n\nWARNING: Temporary Masters still in Use\n\n")
+        self.masters = [self.config.gnomon]

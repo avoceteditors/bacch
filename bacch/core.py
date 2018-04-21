@@ -25,6 +25,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from docutils import nodes
+import sys
+from .server import Server
+import logging
+logger = logging.getLogger()
 
 # General Node Functions
 def skip_node(node):
@@ -32,6 +36,13 @@ def skip_node(node):
 
 def pass_node(node):
     pass
+
+# Run Script
+def run(args):
+    logging.basicConfig(level=logging.INFO)
+    if args.command == 'server':
+        Server(args.source, args.output, args.build)
+
 
 # Active Nodes
 active_nodes = [
@@ -50,7 +61,7 @@ active_nodes = [
     ('comment', 'skip'),
     ('compact_paragraph', 'skip'),
     ('compound', 'pass'),
-    ('container', 'skip'),
+    ('container', 'pass'),
     ('decoration', 'skip'),
     ('definition', 'skip'),
     ('definition_list', 'skip'),
@@ -108,7 +119,7 @@ active_nodes = [
     ('refcount', 'skip'),
     ('reference', 'skip'),
     ('row', 'skip'),
-    ('rubric', 'skip'),
+    ('rubric', 'pass'),
     ('seealso', 'skip'),
     ('start_of_file', 'pass'),
     ('subscript', 'skip'),

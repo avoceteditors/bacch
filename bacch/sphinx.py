@@ -53,6 +53,7 @@ def setup(app):
             ('bacch_pdfbuild_options', None, []),
             ('bacch_use_parts', False, False),
             ('gnomon_use_parts', False, False),
+            ('gnomon', False, ''),
 
             # Document Configuration
             ('bacch_options', None, []),
@@ -72,6 +73,8 @@ def setup(app):
             ('gnomon_noindent', False, False),
             ('bacch_lettrine', False, False),
             ('bacch_lettrine_conf', {}, {}),
+            ('gnomon_lettrine', False, False),
+            ('gnomon_lettrine_conf', {}, {}),
 
             ('bacch_numbers', False, False),
             ('gnomon_numbers', False, False),
@@ -82,6 +85,9 @@ def setup(app):
             ('gnomon_titlepage', None, ''),
             ('bacch_tocpage', False, False),
             ('gnomon_tocpage', False, False),
+            ('bacch_author', '', ''),
+            ('bacch_author_runner', '', ''),
+            ('bacch_title_runner', '', '')
     ]
 
     for (var, default, rebuild) in configs:

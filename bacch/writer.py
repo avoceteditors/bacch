@@ -29,6 +29,8 @@ and Gnomon builders """
 from docutils.writers import Writer
 from docutils.nodes import NodeVisitor
 import jinja2 as jinja
+import re
+from sphinx.writers.latex import LaTeXTranslator as BaseTranslator
 
 from .core import active_nodes, skip_node, pass_node
 
@@ -37,28 +39,32 @@ from .core import active_nodes, skip_node, pass_node
 # LaTeX Writer Class
 class LaTeXWriter(Writer):
 
+
     # Initialization
-    def __init__(self, config, name, template):
+    def __init__(self, config, name, template, builder):
         Writer.__init__(self)
         self.config = config
         self.name = name
         self.template = template
+        self.builder = builder
 
     # Translation
     def translate(self):
         translator = LaTeXTranslator(
                 self.document, self.config,
-                self.name, self.template)
+                self.name, self.template, self.builder)
         self.document.walkabout(translator)
         self.output = translator.astext()
 
 
 ##############################
 # LaTeX Translator
-class LaTeXTranslator(NodeVisitor):
+class LaTeXTranslator(BaseTranslator):
 
-    def __init__(self, document, config, name, template):
-        NodeVisitor.__init__(self, document)
+    def __init__(self, document, config, name, template, builder):
+        document.settings.docclass = 'book'
+        document.settings.author = config.bacch_author
+        BaseTranslator.__init__(self, document, builder)
         self.config = config
         self.name = name
         self.template = template
@@ -74,21 +80,34 @@ class LaTeXTranslator(NodeVisitor):
             if not self.config.bacch_use_parts:
                 level = -1
         elif self.name == 'gnomon':
-            level = 0
+            level = 0 
 
         self.level_sect = self.level_start = level
 
         self.open_paragraph = False
 
+        self.latex_substitutions = [
+            ("^.*?_", "_", "\\_")
+        ]
+            
+
+
         # Configure Nodes
+        skip = ['title']
         for (name, job) in active_nodes:
-            if job == 'skip':
+            if name in skip:
                 setattr(self, 'visit_%s' % name, skip_node)
-            elif job == 'pass':
+            else:
                 setattr(self, 'visit_%s' % name, pass_node)
                 setattr(self, 'depart_%s' % name, pass_node)
-            else:
-                raise ValueError("Node Handler Error: %s" % name)
+
+            #if job == 'skip':
+            #    setattr(self, 'visit_%s' % name, skip_node)
+            #elif job == 'pass':
+            #    setattr(self, 'visit_%s' % name, pass_node)
+            #    setattr(self, 'depart_%s' % name, pass_node)
+            #else:
+            #    raise ValueError("Node Handler Error: %s" % name)
 
     # Render Text
     def astext(self):
@@ -116,13 +135,11 @@ class LaTeXTranslator(NodeVisitor):
 
             text = template.render(
                     body=text,
+                    titleRunner=self.config.bacch_title_runner,
+                    author=self.config.bacch_author,
+                    authorRunner=self.config.bacch_author_runner,
                     title=self.title)
 
-            #t = jinja2.escape(self.template) 
-            #template = jinja2.Template(t) 
-            #text = template.render(
-            #    body=text,
-            #    title=self.title)
         return text
 
     ###################
@@ -139,7 +156,7 @@ class LaTeXTranslator(NodeVisitor):
     def visit_section(self, node):
 
         # Fetch Title
-        title = node.next_node().astext()
+        title = self.latex_escape(node.next_node().astext())
 
         # Increment Section Level
         self.level_sect += 1
@@ -150,7 +167,7 @@ class LaTeXTranslator(NodeVisitor):
             self.title = title
 
 
-        elif self.level_sect > -1:
+        elif self.level_sect > -1 or self.level_sect:
 
             section = self.sections[self.level_sect]
             number = '*'
@@ -163,11 +180,22 @@ class LaTeXTranslator(NodeVisitor):
                     number = ''
 
             self.body.append('\n\\%s%s{%s}\n' % (section, number, title))
+        elif self.level_start == self.level_sect:
+            self.title = title
 
     def depart_section(self, node):
 
         # Decrement Section Level
         self.level_sect += -1
+
+    def visit_rubric(self, node):
+        self.open_paragraph = False
+        self.open_rubric = True
+        self.body.append("\\textbf{")
+
+    def depart_rubric(self, node):
+        self.open_rubric = False
+        self.body.append("}\n\n")
 
     # Paragraph
     def visit_paragraph(self, node):
@@ -184,7 +212,7 @@ class LaTeXTranslator(NodeVisitor):
     def visit_Text(self, node):
 
         # Extract Text
-        text = node.astext()
+        text = self.latex_escape(node.astext())
 
         if self.open_paragraph:
             self.open_paragraph = False
@@ -196,6 +224,16 @@ class LaTeXTranslator(NodeVisitor):
 
     def depart_Text(self, node):
         pass
+
+    def latex_escape(self, text):
+
+        for (match, submatch, replace) in self.latex_substitutions:
+            if re.match(match, text):
+                text = re.sub(submatch, replace, text)
+
+        return text
+
+
 
     # Lettrine
     def lettrine(self, text):
@@ -269,21 +307,5 @@ class LaTeXTranslator(NodeVisitor):
     def depart_emphasis(self, node):
         self.body.append('}')
 
-    def visit_literal_inline(self, node):
-        self.body.append('\\texsc{')
-
-    def depart_literal_inline(self, node):
-        self.body.append('}')
 
 
-    def visit_literal_emphasis(self, node):
-        self.body.append('\\texsc{')
-
-    def depart_literal_emphasis(self, node):
-        self.body.append('}')
-
-    def visit_literal(self, node):
-        self.body.append("Lit:")
-
-    def depart_literal(self, node):
-        self.body.append("}")

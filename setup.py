@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
+from os.path import join
 
 setup(name = 'bacch',
     version = '0.13',
@@ -10,5 +11,5 @@ setup(name = 'bacch',
             'gnomon': 'bacch.sphinx'
         }
     },
-    packages = ['bacch']
+    packages = ['bacch'],
 )
