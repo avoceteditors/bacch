@@ -25,7 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from .builders import BacchBuilder, GnomonBuilder
+#from .builders import BacchBuilder, GnomonBuilder
+from .build import BacchBuilder
 
 
 #########################################
@@ -35,7 +36,6 @@ def setup(app):
 
     # Builders
     app.add_builder(BacchBuilder)
-    app.add_builder(GnomonBuilder)
 
     #########################
     # Configuration
@@ -87,7 +87,12 @@ def setup(app):
             ('gnomon_tocpage', False, False),
             ('bacch_author', '', ''),
             ('bacch_author_runner', '', ''),
-            ('bacch_title_runner', '', '')
+            ('bacch_title_runner', '', ''),
+
+            ('bacch_index', 0, ''),
+            ('bacch_documents', None, True),
+            ('bacch_latex_block', 'BLOCK', True),
+            ('bacch_latex_var', 'VAR', True)
     ]
 
     for (var, default, rebuild) in configs:
