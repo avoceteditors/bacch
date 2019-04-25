@@ -13,6 +13,9 @@ install:
 all: install call
 
 call:
-	@echo ""
-	@echo ""
-	@sphinx-build -b bacch $(SRC) $(OUT)
+
+call-all:
+	@sphinx-build -avTb bacch $(SRC) $(OUT)
+
+call-some:
+	@sphinx-build -vnb bacch $(SRC) $(OUT)
