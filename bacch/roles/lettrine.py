@@ -1,5 +1,5 @@
 ##################################################################################
-# __init__.py - configures the Bacch builder
+# lettrine.py - Configures nodes for lettrine parsing
 #
 # Copyright (c) 2019, Kenneth P. J. Dyer <kenneth@avoceteditors.com>
 # All rights reserved.
@@ -29,51 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##################################################################################
 
-# Module Imports
-from docutils import nodes
+from docutils.nodes import *
+import re
 
-# Local Imports
-from .builders import bacch
-from .roles import lettrine
+class lettrine(TextElement):
+    pass
 
+class lettrine_rubric(TextElement):
+    pass
 
-def visit_node(self, node):
-    raise nodes.SkipNode
+def lettrine_role(name, rawtext, text, lineno, inliner, options={}, content={}):
+    node = lettrine(rawtext, text) 
+    return [node], []
 
-def setup(app):
-    """Configures Sphinx extension"""
+def lettrine_rubric_role(name, rawtext, text, lineno, inliner, options={}, content={}):
+    node = lettrine_rubric(rawtext, text) 
+    return [node], []
 
-    # Builders
-    app.add_builder(bacch.BacchBuilder)
-
-    # Nodes
-    app.add_node(lettrine.lettrine)
-    app.add_node(lettrine.lettrine_rubric)
-
-    # Roles
-    app.add_role('lett', lettrine.lettrine_role)
-    app.add_role('lettrub', lettrine.lettrine_rubric_role)
-
-
-    # Configuration Values
-    config_vals = [
-
-        # Publication Type
-        ('bacch_author', 'None', True),
-        ('bacch_chapter_packages', {}, True),
-        ('bacch_lettrine', True, True),
-        ('bacch_lettrine_levels', 2, True),
-        ('bacch_masters', [], True),
-        ('bacch_options', [], True),
-        ('bacch_packages', {}, True),
-        ('bacch_publisher', None, True),
-        ('bacch_publisher_cities', [], True),
-        ('bacch_subtitle', None, True),
-        ('bacch_surname', None, True),
-        ('bacch_type', 'novel', True),
-        ('bacch_use_parts', True, True)
-    ]
-
-    for (var, default, rebuild) in config_vals:
-        app.add_config_value(var, default, rebuild)
 
