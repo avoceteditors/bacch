@@ -1,15 +1,32 @@
-#!/usr/bin/env python3
+from distutils.core import setup
 
-from setuptools import setup, find_packages
-from os.path import join
+import pathlib
+import re
 
-setup(name = 'bacch',
-    version = '0.14',
-    entry_point = {
-        'sphinx.builders': {
-            'bacch': 'bacch.sphinx',
-            'gnomon': 'bacch.sphinx'
-        }
-    },
-    packages = find_packages(exclude=['tests']) 
+# Configure Packages
+packages = [
+    "bacch",
+    "bacch.commands",
+    "bacch.tex"
+]
+package_dirs = {}
+exts = []
+for package in packages:
+    src = re.sub("\.", "/", package)
+    package_dirs[package] = src
+
+# Configure Scripts
+scripts_path = pathlib.Path("scripts")
+scripts = []
+for i in scripts_path.glob('*'):
+    if i.is_file():
+        scripts.append(str(i))
+
+setup(
+    name="bacch",
+    version="2021.1",
+    scripts=scripts,
+    package_dir=package_dirs,
+    packages=packages,
 )
+
