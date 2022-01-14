@@ -6,8 +6,6 @@ import re
 # Configure Packages
 packages = [
     "bacch",
-    "bacch.commands",
-    "bacch.tex"
 ]
 package_dirs = {}
 exts = []
@@ -24,9 +22,12 @@ for i in scripts_path.glob('*'):
 
 setup(
     name="bacch",
-    version="2021.1",
-    scripts=scripts,
-    package_dir=package_dirs,
+    version="2022.1",
     packages=packages,
+    entry_point={
+        "sphinx.builders": {
+            "bacch": "bacch.sphinx"
+        }
+    }
 )
 
